@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ANH CHACH MAI DINH - The Gaming Hub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;700&family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* --- CSS Variables cho Dark, Light, và Gamer Modes --- */
+        :root {
+            /* Dark Theme (Default) */
+            --bg-primary: #05050f; /* Nền tối sâu */
+            --text-color-primary: #e0e0e0;
+            --container-bg: rgba(20, 20, 35, 0.9); /* Hơi trong suốt */
+            --accent-color: #00e6e6; /* Cyan Neon */
+            --accent-color-light: #66ffff;
+            --accent-color-hover: #00ffff; /* Cyan sáng hơn */
+            --button-bg: rgba(30, 30, 50, 0.7);
+            --button-hover-bg: rgba(50, 50, 80, 0.9);
+            --intro-text-color: #ff33cc; /* Magenta Neon */
+            --setting-icon-color: #e0e0e0;
+            --border-glow-color: rgba(0, 230, 230, 0.7);
+            --intro-glitch-color: #ff00ff;
+            --intro-glitch-color2: #00ffff;
+            --section-bg: rgba(10, 10, 20, 0.7); /* Nền section hơi sáng hơn */
+            --section-title-color: #ffaa00; /* Cam-Vàng */
+            --footer-bg: #03030a;
+
+            /* Preloader Specific */
+            --preloader-bg: #000;
+            --preloader-bar-color: #00e6e6;
+            --preloader-text-color: #00e6e6;
+
+            /* Gaming Intro specific */
+            --gaming-intro-bg: #000;
+            --gaming-intro-text: #00ff00; /* Neon Green */
+            --gaming-intro-glitch1: #ff00ff;
+            --gaming-intro-glitch2: #00ffff;
+        }
+
+        body.light-theme {
+            --bg-primary: #f0f2f5;
+            --text-color-primary: #333;
+            --container-bg: rgba(255, 255, 255, 0.95);
+            --accent-color: #1e88e5; /* Xanh dương */
+            --accent-color-light: #64b5f6;
+            --accent-color-hover: #42a5f5;
+            --button-bg: rgba(220, 220, 220, 0.8);
+            --button-hover-bg: rgba(190, 190, 190, 0.95);
+            --intro-text-color: #d81b60; /* Đỏ hồng */
+            --setting-icon-color: #333;
+            --border-glow-color: rgba(30, 136, 229, 0.7);
+            --intro-glitch-color: #c2185b;
+            --intro-glitch-color2: #fbc02d;
+            --section-bg: rgba(255, 255, 255, 0.8);
+            --section-title-color: #0d47a1; /* Xanh dương đậm */
+            --footer-bg: #e0e0e0;
+
+            /* Preloader Specific (Light) */
+            --preloader-bg: #fff;
+            --preloader-bar-color: #1e88e5;
+            --preloader-text-color: #1e88e5;
+
+            /* Gaming Intro specific (Light) */
+            --gaming-intro-bg: #f0f2f5;
+            --gaming-intro-text: #d81b60;
+            --gaming-intro-glitch1: #c2185b;
+            --gaming-intro-glitch2: #f1c40f;
+        }
+
+        body.gamer-mode {
+            --bg-primary: #000000;
+            --text-color-primary: #00ff00; /* Xanh lá sáng Cyber */
+            --container-bg: rgba(0, 0, 0, 0.98);
+            --accent-color: #ff00ff; /* Magenta Neon */
+            --accent-color-light: #ff69b4;
+            --accent-color-hover: #00ffff; /* Cyan Neon */
+            --button-bg: rgba(10, 10, 10, 0.9);
+            --button-hover-bg: rgba(20, 20, 20, 0.98);
+            --intro-text-color: #ff00ff;
+            --setting-icon-color: #00ff00;
+            --border-glow-color: rgba(255, 0, 255, 0.8);
+            --section-bg: rgba(5, 5, 5, 0.9);
+            --section-title-color: #00ff00;
+            --footer-bg: #000;
+
+            /* Preloader Specific (Gamer) */
+            --preloader-bg: #000;
+            --preloader-bar-color: #ff00ff;
+            --preloader-text-color: #00ff00;
+
+            /* Gaming Intro specific (Gamer) */
+            --gaming-intro-bg: #000;
+            --gaming-intro-text: #00ff00;
+            --gaming-intro-glitch1: #ff00ff;
+            --gaming-intro-glitch2: #00ffff;
+
+            /* Gamer Mode Fonts and Shadows */
+            font-family: 'Press Start 2P', cursive;
+        }
+        body.gamer-mode #intro-screen,
+        body.gamer-mode header h1,
+        body.gamer-mode .section-title,
+        body.gamer-mode .game-button,
+        body.gamer-mode footer p,
+        body.gamer-mode .preloader-text {
+            font-family: 'Press Start 2P', cursive;
+            text-shadow: 0 0 10px var(--accent-color), 0 0 20px var(--accent-color-hover);
+        }
+        body.gamer-mode .game-button,
+        body.gamer-mode .setting-btn {
+            border: 2px solid var(--accent-color);
+            box-shadow: 0 0 15px var(--accent-color-hover);
+        }
+        body.gamer-mode .game-button:hover,
+        body.gamer-mode .setting-btn:hover {
+            box-shadow: 0 0 25px var(--accent-color-hover), 0 0 40px var(--accent-color-hover);
+        }
+
+        /* --- Global Styles --- */
+        html {
+            scroll-behavior: smooth;
+        }
+        body {
+            margin: 0;
+            overflow: hidden; /* Tắt cuộn mặc định ban đầu */
+            font-family: 'Orbitron', sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-color-primary);
+            transition: background-color 0.8s ease-in-out, color 0.8s ease-in-out, font-family 0.3s;
+            position: relative;
+            perspective: 1000px; /* Cho hiệu ứng 3D */
+            min-height: 100vh; /* Đảm bảo body đủ cao */
+        }
+        body.allow-scroll {
+            overflow-y: auto !important; /* Quan trọng: Đảm bảo cuộn được bật */
+        }
+
+        /* Preloader */
+        #preloader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--preloader-bg);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 3000; /* Cao nhất */
+            transition: opacity 1s ease-out;
+            opacity: 1;
+        }
+
+        #preloader.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .preloader-text {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2em;
+            color: var(--preloader-text-color);
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px var(--preloader-text-color);
+            animation: text-pulse 1.5s infinite alternate;
+        }
+        @keyframes text-pulse {
+            0% { opacity: 0.8; }
+            100% { opacity: 1; }
+        }
+
+        .loading-bar-container {
+            width: 300px;
+            height: 10px;
+            background-color: rgba(var(--preloader-bar-color), 0.2);
+            border-radius: 5px;
+            overflow: hidden;
+            box-shadow: 0 0 15px var(--preloader-bar-color);
+        }
+
+        .loading-bar {
+            width: 0%;
+            height: 100%;
+            background-color: var(--preloader-bar-color);
+            transition: width 0.3s linear;
+            border-radius: 5px;
+        }
+
+        /* Gaming Intro Screen */
+        #gaming-intro-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--gaming-intro-bg);
+            display: none; /* Mặc định ẩn */
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 4em;
+            color: var(--gaming-intro-text);
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+            z-index: 2500; /* Cao hơn intro chính, thấp hơn preloader */
+            text-shadow: 0 0 10px var(--gaming-intro-text), 0 0 20px var(--gaming-intro-text);
+            text-align: center;
+            line-height: 1.2;
+            overflow: hidden;
+            pointer-events: none; /* Mặc định không chặn click */
+        }
+        #gaming-intro-screen.visible {
+            opacity: 1;
+            display: flex;
+            pointer-events: auto; /* Chặn click khi hiển thị */
+        }
+        #gaming-intro-screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* Scanline effect for gaming intro */
+        #gaming-intro-screen::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                to bottom,
+                transparent 0%,
+                transparent 1px,
+                rgba(0, 0, 0, 0.5) 1px,
+                rgba(0, 0, 0, 0.5) 2px
+            );
+            pointer-events: none;
+            opacity: 0.3;
+        }
+
+        /* Background Grid Pattern */
+        #grid-pattern {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                radial-gradient(circle at center, rgba(var(--accent-color), 0.1) 1px, transparent 1px),
+                linear-gradient(to right, var(--bg-primary) 1px, transparent 1px),
+                linear-gradient(to bottom, var(--bg-primary) 1px, transparent 1px);
+            background-size: 50px 50px;
+            opacity: 0.2;
+            z-index: 1;
+            animation: grid-pulse 10s infinite alternate;
+        }
+
+        /* Parallax Background Layers */
+        #parallax-layer-1, #parallax-layer-2 {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center center;
+            z-index: 0; /* Thấp nhất */
+            filter: blur(1px); /* Hơi mờ */
+            opacity: 0.5;
+            transition: opacity 0.5s ease-in-out; /* Chuyển màu mượt khi đổi theme */
+        }
+        #parallax-layer-1 {
+            background-image: url('https://placehold.co/1920x1080/0d0d1a/0a0a1a?text=Background_Layer_1'); /* Placeholder hoặc ảnh của mày */
+            transform: translateZ(-1px) scale(2);
+        }
+         #parallax-layer-2 {
+            background-image: url('https://placehold.co/1920x1080/1a1a2e/0f0f1c?text=Background_Layer_2'); /* Placeholder hoặc ảnh của mày */
+            transform: translateZ(-0.5px) scale(1.5);
+            filter: blur(0.5px); /* Hơi mờ hơn */
+            opacity: 0.3;
+        }
+
+        /* Intro Screen (Sau preloader, trước nội dung chính) */
+        #intro-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-primary);
+            display: none; /* Mặc định ẩn, sẽ được JS bật */
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-size: 5em;
+            font-weight: 900;
+            color: var(--intro-text-color);
+            opacity: 0; /* Mặc định ẩn, sẽ được JS bật */
+            transition: opacity 2s ease-in-out, background-color 0.8s ease-in-out;
+            z-index: 2000;
+            text-shadow: 0 0 20px var(--intro-text-color), 0 0 40px var(--intro-text-color);
+            animation: text-glitch 0.5s infinite alternate;
+            text-align: center;
+            line-height: 1.2;
+            overflow: hidden;
+            pointer-events: none; /* Mặc định không chặn click */
+        }
+        #intro-screen.visible { /* Class mới để hiển thị */
+            opacity: 1;
+            display: flex;
+            pointer-events: auto; /* Chặn click khi hiển thị */
+        }
+        #intro-screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* Particle Background Effect (Canvas) */
+        #particle-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 15; /* Trên grid và parallax */
+        }
+
+        /* Main Content - Quan trọng: Bỏ justify-content: center */
+        #main-container {
+            width: 100%;
+            min-height: 100vh; /* Đảm bảo nó chiếm toàn bộ chiều cao màn hình */
+            display: none; /* Mặc định ẩn, sẽ được JS bật */
+            flex-direction: column;
+            /* justify-content: center; */ /* Bỏ cái này */
+            align-items: center; /* Vẫn giữ căn giữa theo chiều ngang */
+            padding-top: 50px; /* Thêm padding trên để tránh nút settings */
+            box-sizing: border-box;
+            opacity: 0; /* Mặc định ẩn, sẽ được JS bật */
+            transition: opacity 1.5s ease-in-out;
+            z-index: 20; /* Trên mọi background */
+            position: relative;
+        }
+        #main-container.visible {
+            opacity: 1;
+            display: flex;
+        }
+
+        /* Header Section */
+        header {
+            text-align: center;
+            margin-bottom: 60px; /* Điều chỉnh margin */
+            padding: 20px;
+            width: 90%;
+            max-width: 900px;
+            background-color: var(--container-bg);
+            border-radius: 20px;
+            box-shadow: 0 0 30px var(--border-glow-color), 0 0 60px var(--border-glow-color);
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--accent-color);
+            transform: translateY(50px) scale(0.9);
+            opacity: 0;
+            animation: fadeInScaleUp 1.5s forwards 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        header h1 {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 4.5em;
+            color: var(--accent-color);
+            margin: 0;
+            text-shadow: 0 0 15px var(--accent-color-light), 0 0 30px var(--accent-color);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+        header p {
+            font-size: 1.5em;
+            color: var(--text-color-primary);
+            margin-top: 20px;
+            line-height: 1.6;
+        }
+
+        /* Section Styling - cho game selection */
+        .section {
+            width: 90%;
+            max-width: 1200px;
+            padding: 60px 40px; /* Giữ padding này cho desktop */
+            margin-bottom: 80px; /* Điều chỉnh margin */
+            background-color: var(--section-bg);
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(var(--accent-color), 0.2);
+            backdrop-filter: blur(8px);
+            opacity: 0;
+            transform: translateY(50px);
+            transition: opacity 1s ease-out, transform 1s ease-out;
+        }
+        .section.in-view {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .section-title {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 3.5em;
+            color: var(--section-title-color);
+            margin-bottom: 50px;
+            text-align: center;
+            text-shadow: 0 0 10px var(--section-title-color), 0 0 20px rgba(var(--section-title-color), 0.5);
+            text-transform: uppercase;
+        }
+
+        /* Game Selection */
+        .game-selection {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            justify-content: center;
+        }
+
+        .game-button {
+            background-color: var(--button-bg);
+            color: var(--text-color-primary);
+            border: 2px solid var(--accent-color);
+            padding: 25px 35px;
+            font-size: 1.8em;
+            font-weight: 700;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3), 0 0 15px rgba(var(--accent-color), 0.5);
+            position: relative;
+            overflow: hidden;
+            transform-origin: center center;
+            text-transform: uppercase;
+        }
+
+        .game-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -150%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(120deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: all 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
+            transform: skewX(-20deg);
+        }
+
+        .game-button:hover::before {
+            left: 150%;
+        }
+
+        .game-button:hover {
+            background-color: var(--button-hover-bg);
+            transform: translateY(-10px) scale(1.05) rotateX(5deg);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5), 0 0 30px var(--accent-color-hover);
+            color: var(--accent-color-hover);
+            border-color: var(--accent-color-hover);
+        }
+
+        .game-button:active {
+            transform: translateY(-2px) scale(1.01) rotateX(0deg);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3), 0 0 10px var(--accent-color);
+        }
+
+        .game-button i {
+            font-size: 2.5em;
+            color: var(--accent-color-light);
+            transition: color 0.3s ease;
+            margin-bottom: 10px;
+        }
+
+        .game-button:hover i {
+            color: var(--accent-color-hover);
+        }
+
+        /* Settings buttons */
+        #settings-buttons {
+            position: fixed;
+            top: 30px;
+            left: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            z-index: 1010;
+            opacity: 0;
+            transition: opacity 1.5s ease-in-out;
+        }
+
+        #settings-buttons.visible {
+            opacity: 1;
+        }
+
+        .setting-btn {
+            background: var(--button-bg);
+            border: 2px solid var(--accent-color);
+            border-radius: 50%;
+            width: 55px;
+            height: 55px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3), 0 0 10px rgba(var(--accent-color), 0.5);
+            transition: all 0.3s ease;
+        }
+
+        .setting-btn i {
+            color: var(--setting-icon-color);
+            font-size: 1.8em;
+            transition: color 0.3s ease;
+        }
+
+        .setting-btn:hover {
+            background-color: var(--button-hover-bg);
+            transform: scale(1.15) rotate(10deg);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4), 0 0 20px var(--accent-color-hover);
+            border-color: var(--accent-color-hover);
+        }
+
+        .setting-btn:active {
+            transform: scale(1.05) rotate(0deg);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Footer */
+        footer {
+            width: 100%;
+            padding: 40px 20px;
+            background-color: var(--footer-bg);
+            text-align: center;
+            font-size: 1.1em;
+            color: var(--text-color-primary);
+            margin-top: 80px; /* Điều chỉnh margin */
+            box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.2);
+            opacity: 0;
+            transform: translateY(50px);
+            transition: opacity 1s ease-out, transform 1s ease-out;
+        }
+        footer.in-view {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Animations */
+        @keyframes fadeInScaleUp {
+            from { opacity: 0; transform: translateY(50px) scale(0.9); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes fadeInRise {
+            from { opacity: 0; transform: translateY(50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes text-glitch {
+            0% { text-shadow: 0 0 20px var(--intro-text-color), 0 0 40px var(--intro-text-color); transform: translateX(0); }
+            20% { text-shadow: 2px 0 20px var(--intro-glitch-color), -2px 0 20px var(--intro-glitch-color2); transform: translateX(-5px); }
+            40% { text-shadow: -3px 0 20px var(--intro-glitch-color2), 3px 0 20px var(--intro-glitch-color); transform: translateX(5px); }
+            60% { text-shadow: 0 0 20px var(--intro-text-color), 0 0 40px var(--intro-text-color); transform: translateX(0); }
+            80% { text-shadow: 1px 0 20px var(--intro-glitch-color), -1px 0 20px var(--intro-glitch-color2); transform: translateX(-2px); }
+            100% { text-shadow: 0 0 20px var(--intro-text-color), 0 0 40px var(--intro-text-color); transform: translateX(0); }
+        }
+
+        /* --- Responsive Adjustments --- */
+        @media (max-width: 768px) {
+            #intro-screen {
+                font-size: 2.5em;
+                padding: 0 20px;
+            }
+            #gaming-intro-screen {
+                font-size: 2.5em;
+                padding: 0 20px;
+            }
+            .preloader-text {
+                font-size: 1.5em;
+            }
+            .loading-bar-container {
+                width: 200px;
+            }
+            header h1 {
+                font-size: 3em;
+            }
+            header p {
+                font-size: 1.2em;
+            }
+            .section-title {
+                font-size: 2.5em;
+                margin-bottom: 30px;
+            }
+            .game-button {
+                font-size: 1.3em;
+                padding: 20px 25px;
+                gap: 10px;
+            }
+            .game-button i {
+                font-size: 2em;
+            }
+            .section {
+                padding: 40px 20px;
+                margin-bottom: 60px;
+            }
+            #settings-buttons {
+                top: 15px;
+                left: 15px;
+                flex-direction: row; /* Nút settings nằm ngang trên mobile */
+                gap: 10px;
+            }
+            .setting-btn {
+                width: 45px;
+                height: 45px;
+            }
+            .setting-btn i {
+                font-size: 1.4em;
+            }
+            footer {
+                padding: 30px 15px;
+                margin-top: 60px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            #intro-screen {
+                font-size: 1.8em;
+                line-height: 1.4;
+            }
+            #gaming-intro-screen {
+                font-size: 1.8em;
+                line-height: 1.4;
+            }
+            header h1 {
+                font-size: 2.2em;
+            }
+            header p {
+                font-size: 1em;
+            }
+            .section-title {
+                font-size: 1.8em;
+            }
+            .game-button {
+                font-size: 1.1em;
+                padding: 15px 20px;
+            }
+            .game-button i {
+                font-size: 1.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="preloader">
+        <div class="preloader-text">LOADING ANH CHACH ZONE...</div>
+        <div class="loading-bar-container">
+            <div class="loading-bar" id="loading-bar"></div>
+        </div>
+    </div>
+
+    <div id="gaming-intro-screen">
+        <span class="glitch-text" data-text="J97 MODE ACTIVATED">J97 MODE ACTIVATED</span>
+    </div>
+
+    <div id="parallax-layer-1"></div>
+    <div id="parallax-layer-2"></div>
+    <div id="grid-pattern"></div> <canvas id="particle-canvas"></canvas>
+
+    <div id="intro-screen">
+        ANH CHACH<br>
+        MAI DINH
+    </div>
+
+    <div id="settings-buttons">
+        <button id="theme-toggle" class="setting-btn" title="Chế độ sáng/tối">
+            <i class="fas fa-sun"></i>
+        </button>
+        <button id="gamer-mode-toggle" class="setting-btn" title="Chế độ Game Thủ">
+            <i class="fas fa-headset"></i>
+        </button>
+    </div>
+
+    <div id="main-container">
+        <header>
+            <h1>J97 ZONE: SELECT YOUR ADVENTURE</h1>
+            <p>Chào mừng đến với Gaming Hub của ANH CHACH MAI DINH. Hãy khám phá những tựa game độc đáo và đắm mình vào thế giới giải trí không giới hạn!</p>
+        </header>
+
+        <section id="games" class="section">
+            <h2 class="section-title">CHỌN TRÒ CHƠI CỦA MÀY</h2>
+            <div class="game-selection">
+                <a href="j97-bocon.html" class="game-button flappy-j97">
+                    <i class="fas fa-gamepad"></i>
+                    <span>FLAPPY J97<br>(BỘ CON)</span>
+                </a>
+                <a href="j97-docon.html" class="game-button"><i class="fas fa-bomb"></i><span>J97 DÒ MÌN<br>(ĐỒ CON)</span></a>
+                <a href="jack-rex.html" class="game-button"><i class="fas fa-dragon"></i><span>J97-REX<br>(JACK-REX)</span></a>
+            </div>
+        </section>
+
+        <footer>
+            <p>&copy; 2025 ANH CHACH MAI DINH. All rights reserved.</p>
+            <p>Made with <i class="fas fa-heart" style="color: #e94560;"></i> by the J97 Team</p>
+        </footer>
+    </div>
+
+    <script>
+        // Các biến toàn cục cho âm thanh để tránh phát nhiều lần và giữ âm lượng nhất quán
+        let clickSound = new Audio('https://www.soundjay.com/buttons/button-2.mp3'); // Âm thanh click cơ bản
+        clickSound.volume = 0.5; // Giảm âm lượng
+
+        let gamerModeSoundOn = new Audio('https://www.soundjay.com/buttons/beep-07.mp3'); // Example on sound
+        gamerModeSoundOn.volume = 0.6;
+
+        let gamerModeSoundOff = new Audio('https://www.soundjay.com/buttons/beep-04.mp3'); // Example off sound
+        gamerModeSoundOff.volume = 0.6;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const preloader = document.getElementById('preloader');
+            const loadingBar = document.getElementById('loading-bar');
+            const introScreen = document.getElementById('intro-screen');
+            const gamingIntroScreen = document.getElementById('gaming-intro-screen');
+            const mainContainer = document.getElementById('main-container');
+            const settingsButtons = document.getElementById('settings-buttons');
+            const themeToggle = document.getElementById('theme-toggle');
+            const gamerModeToggle = document.getElementById('gamer-mode-toggle');
+            const particleCanvas = document.getElementById('particle-canvas');
+            const ctx = particleCanvas.getContext('2d');
+            const parallaxLayer1 = document.getElementById('parallax-layer-1');
+            const parallaxLayer2 = document.getElementById('parallax-layer-2');
+            const gridPattern = document.getElementById('grid-pattern');
+
+            let particles = [];
+            const numParticles = 150; // Tăng số lượng hạt để hiệu ứng phong phú hơn
+
+            // --- Vô hiệu hóa cuộn trang ban đầu ---
+            document.body.style.overflow = 'hidden';
+
+            // --- Logic Preloader ---
+            let loadProgress = 0;
+            const totalLoadTime = 3000; // Tổng thời gian cho animation preloader (ms)
+            const incrementAmount = 5; // Số lượng loadProgress tăng mỗi bước
+            const numSteps = 100 / incrementAmount; // Số bước để đạt 100%
+            const intervalDuration = totalLoadTime / numSteps; // Thời gian mỗi bước
+
+            const updateLoadingBar = () => {
+                const interval = setInterval(() => {
+                    loadProgress += incrementAmount;
+                    if (loadProgress >= 100) {
+                        loadProgress = 100;
+                        clearInterval(interval);
+                        setTimeout(() => {
+                            preloader.classList.add('hidden'); // Bắt đầu ẩn preloader (opacity 0)
+                            setTimeout(() => {
+                                preloader.style.display = 'none'; // Ẩn hoàn toàn preloader sau khi fade
+                                showIntroSequence(); // Bắt đầu chuỗi intro chính
+                            }, 1000); // Đợi preloader fade out (1s transition)
+                        }, 500); // Tạm dừng ngắn ở 100%
+                    }
+                    loadingBar.style.width = loadProgress + '%';
+                }, intervalDuration); // Sử dụng thời gian tính toán cho mỗi bước
+            };
+
+            // Khởi động animation preloader
+            updateLoadingBar();
+
+            // --- Hiệu ứng hạt (Particle Effect) ---
+            function Particle(x, y, radius, color, velocity) {
+                this.x = x;
+                this.y = y;
+                this.radius = radius;
+                this.color = color;
+                this.velocity = { x: (Math.random() - 0.5) * velocity, y: (Math.random() - 0.5) * velocity };
+                this.opacity = Math.random() * 0.8 + 0.2;
+                this.originalOpacity = this.opacity;
+                this.life = Math.random() * 100 + 50; // Tuổi thọ theo khung hình
+                this.remainingLife = this.life;
+
+                this.draw = function() {
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(${this.color.r}, ${this.color.g}, ${this.color.b}, ${this.opacity})`;
+                    ctx.shadowBlur = this.radius * 3;
+                    ctx.shadowColor = `rgba(${this.color.r}, ${this.color.g}, ${this.color.b}, ${this.opacity * 0.8})`;
+                    ctx.fill();
+                    ctx.shadowBlur = 0; // Đặt lại shadow
+                };
+
+                this.update = function() {
+                    this.x += this.velocity.x;
+                    this.y += this.velocity.y;
+                    this.remainingLife--;
+                    this.opacity = this.originalOpacity * (this.remainingLife / this.life);
+
+                    if (this.remainingLife <= 0 || this.x < -this.radius || this.x > particleCanvas.width + this.radius ||
+                        this.y < -this.radius || this.y > particleCanvas.height + this.radius) {
+                        this.reset(); // Reset khi hết tuổi thọ hoặc ra khỏi màn hình
+                    }
+                };
+
+                this.reset = function() {
+                    const side = Math.floor(Math.random() * 4); // 0: trên, 1: phải, 2: dưới, 3: trái
+                    if (side === 0) { // Trên
+                        this.x = Math.random() * particleCanvas.width;
+                        this.y = -this.radius;
+                    } else if (side === 1) { // Phải
+                        this.x = particleCanvas.width + this.radius;
+                        this.y = Math.random() * particleCanvas.height;
+                    } else if (side === 2) { // Dưới
+                        this.x = Math.random() * particleCanvas.width;
+                        this.y = particleCanvas.height + this.radius;
+                    } else { // Trái
+                        this.x = -this.radius;
+                        this.y = Math.random() * particleCanvas.height;
+                    }
+
+                    this.radius = Math.random() * 2 + 1;
+                    this.opacity = Math.random() * 0.8 + 0.2;
+                    this.originalOpacity = this.opacity;
+                    this.life = Math.random() * 100 + 50;
+                    this.remainingLife = this.life;
+
+                    const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent-color');
+                    this.color = hexToRgb(accentColor);
+                    this.velocity = { x: (Math.random() - 0.5) * 0.8, y: (Math.random() - 0.5) * 0.8 };
+                };
+            }
+
+            function hexToRgb(hex) {
+                if (!hex || hex.length < 7) return { r: 255, g: 255, b: 255 }; // Fallback nếu hex không hợp lệ
+                const bigint = parseInt(hex.replace("#", ""), 16);
+                return { r: (bigint >> 16) & 255, g: (bigint >> 8) & 255, b: bigint & 255 };
+            }
+
+            function initParticles() {
+                particles = [];
+                for (let i = 0; i < numParticles; i++) {
+                    const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent-color');
+                    particles.push(new Particle(
+                        Math.random() * particleCanvas.width,
+                        Math.random() * particleCanvas.height,
+                        Math.random() * 2 + 1,
+                        hexToRgb(accentColor),
+                        0.8 // Tốc độ ban đầu cho hạt mới
+                    ));
+                }
+            }
+
+            function animateParticles() {
+                ctx.clearRect(0, 0, particleCanvas.width, particleCanvas.height);
+                particles.forEach(p => {
+                    p.update();
+                    p.draw();
+                });
+                requestAnimationFrame(animateParticles);
+            }
+
+            const resizeCanvas = () => {
+                particleCanvas.width = window.innerWidth;
+                particleCanvas.height = window.innerHeight;
+                initParticles();
+            };
+            window.addEventListener('resize', resizeCanvas);
+            resizeCanvas(); // Gọi lần đầu
+
+            // --- Hiệu ứng Parallax ---
+            window.addEventListener('scroll', () => {
+                const scrollY = window.scrollY;
+                // Điều chỉnh hệ số dựa trên tốc độ parallax mong muốn
+                parallaxLayer1.style.transform = `translateY(${scrollY * 0.1}px) scale(1.1)`; // Chậm hơn, gần hơn
+                parallaxLayer2.style.transform = `translateY(${scrollY * 0.05}px) scale(1.05)`; // Chậm hơn nữa, xa hơn
+                gridPattern.style.transform = `translateY(${scrollY * 0.02}px)`; // Chậm nhất, lưới
+            });
+
+            // --- Chuyển đổi Theme ---
+            const applyTheme = (theme) => {
+                document.body.classList.remove('light-theme', 'dark-theme', 'gamer-mode');
+                if (theme) {
+                    document.body.classList.add(theme);
+                }
+                if (theme === 'light-theme') {
+                    themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+                } else {
+                    themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+                }
+                particles.forEach(p => p.reset()); // Cập nhật màu hạt khi đổi theme
+            };
+
+            const currentTheme = localStorage.getItem('j97HubTheme') || 'dark-theme';
+            applyTheme(currentTheme);
+
+            themeToggle.addEventListener('click', () => {
+                clickSound.play().catch(e => console.error("Lỗi phát âm thanh:", e));
+                if (document.body.classList.contains('light-theme')) {
+                    applyTheme('dark-theme');
+                    localStorage.setItem('j97HubTheme', 'dark-theme');
+                } else {
+                    applyTheme('light-theme');
+                    localStorage.setItem('j97HubTheme', 'light-theme');
+                }
+            });
+
+            // --- Chuyển đổi Chế độ Game Thủ ---
+            const currentGamerMode = localStorage.getItem('j97HubGamerMode');
+            if (currentGamerMode === 'active') {
+                document.body.classList.add('gamer-mode');
+                gamerModeToggle.innerHTML = '<i class="fas fa-headset" style="color: var(--accent-color-hover);"></i>';
+            } else {
+                gamerModeToggle.innerHTML = '<i class="fas fa-headset"></i>';
+            }
+
+            gamerModeToggle.addEventListener('click', () => {
+                if (document.body.classList.contains('gamer-mode')) {
+                    gamerModeSoundOff.play().catch(e => console.error("Lỗi phát âm thanh:", e));
+                    localStorage.setItem('j97HubGamerMode', 'inactive');
+                    gamerModeToggle.innerHTML = '<i class="fas fa-headset"></i>';
+                    document.body.classList.remove('gamer-mode');
+                    const savedTheme = localStorage.getItem('j97HubTheme') || 'dark-theme'; // Quay về theme đã lưu
+                    applyTheme(savedTheme);
+                } else {
+                    // Activate gamer mode intro
+                    showGamingIntro();
+                }
+                particles.forEach(p => p.reset()); // Đảm bảo hạt cập nhật màu
+            });
+
+            // --- Gaming Intro Sequence ---
+            const showGamingIntro = () => {
+                document.body.style.overflow = 'hidden'; // Vô hiệu hóa cuộn khi gaming intro xuất hiện
+                gamingIntroScreen.classList.add('visible'); // Hiển thị gaming intro
+                gamerModeSoundOn.play().catch(e => console.error("Lỗi phát âm thanh gaming intro:", e));
+
+                setTimeout(() => {
+                    gamingIntroScreen.classList.remove('visible'); // Bắt đầu ẩn gaming intro
+                    gamingIntroScreen.classList.add('hidden');
+                    setTimeout(() => {
+                        gamingIntroScreen.style.display = 'none'; // Ẩn hoàn toàn gaming intro
+                        // Áp dụng gamer mode sau khi intro ẩn
+                        localStorage.setItem('j97HubGamerMode', 'active');
+                        gamerModeToggle.innerHTML = '<i class="fas fa-headset" style="color: var(--accent-color-hover);"></i>';
+                        document.body.classList.add('gamer-mode');
+                        // Cho phép cuộn trang sau khi gaming intro xong
+                        document.body.classList.add('allow-scroll'); // **Quan trọng: đảm bảo cuộn được bật**
+                        particles.forEach(p => p.reset());
+                    }, 1000); // Thời gian fade out của gaming intro
+                }, 3000); // Thời gian gaming intro hiển thị
+            };
+
+
+            // --- Chuỗi hiển thị chính (sau Preloader) ---
+            const showIntroSequence = () => {
+                // Hiển thị intro screen
+                introScreen.classList.add('visible'); // Sử dụng class 'visible' mới
+                introScreen.classList.remove('hidden'); // Đảm bảo không bị ẩn
+
+                setTimeout(() => {
+                    introScreen.classList.remove('visible'); // Bắt đầu fade intro
+                    introScreen.classList.add('hidden');
+                    setTimeout(() => {
+                        introScreen.style.display = 'none'; // Ẩn intro sau khi fade
+                        mainContainer.classList.add('visible'); // Hiển thị nội dung chính
+                        settingsButtons.classList.add('visible'); // Hiển thị nút cài đặt
+                        animateParticles(); // Bắt đầu animation hạt
+                        document.body.classList.add('allow-scroll'); // **Quan trọng: Cho phép cuộn trang sau khi intro kết thúc**
+                    }, 2000); // Thời gian fade out của intro (2s transition)
+                }, 3000); // Thời gian intro hiển thị trước khi fade out (3s)
+            };
+
+            // Intersection Observer để các phần tử hiện lên mượt mà khi vào tầm nhìn (nếu có cuộn)
+            const sectionsToObserve = document.querySelectorAll('header, .section, footer');
+            const observerOptions = {
+                root: null, // viewport
+                rootMargin: '0px',
+                threshold: 0.1 // 10% của section hiển thị để kích hoạt
+            };
+
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('in-view');
+                        // Nếu muốn animation chỉ chạy 1 lần khi vào view
+                        // observer.unobserve(entry.target);
+                    } else {
+                        // Nếu muốn animation chạy lại khi ra khỏi view và vào lại
+                        entry.target.classList.remove('in-view');
+                    }
+                });
+            }, observerOptions);
+
+            // Bắt đầu quan sát sau khi mainContainer hiển thị
+            mainContainer.addEventListener('transitionend', () => {
+                if (mainContainer.classList.contains('visible')) {
+                    sectionsToObserve.forEach(section => {
+                        observer.observe(section);
+                    });
+                }
+            }, { once: true }); // Chỉ chạy một lần sau khi mainContainer hiện lên
+        });
+    </script>
+</body>
+</html>

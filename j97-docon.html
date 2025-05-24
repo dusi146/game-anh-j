@@ -1,0 +1,1210 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>J97 Dò Mìn</title>
+    <link href="https://fonts.googleapis.com/css2?family=Oxanium:wght@400;700&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        /* --- CSS Variables cho Dark và Light Mode --- */
+        /* Default (Dark) Theme Variables */
+        :root {
+            --bg-primary: #1a1a2e; /* body background */
+            --text-color-primary: #e0e0e0; /* general text color */
+            --game-container-bg: #3e3e4a; /* game-container background */
+            --menu-overlay-bg: rgba(15, 15, 28, 0.9); /* menu-screen background */
+            --intro-bg: #0f0f1c; /* intro-screen background */
+            --accent-color: #e94560; /* main accent color for buttons, titles */
+            --accent-color-hover: #c9354e;
+            --j97-color: #ffd700; /* Màu vàng của J97 */
+            --ground-color: #3e3e4a; /* Màu nền đường chạy */
+            --ground-border-color: #e0e0e0; /* Màu viền đường chạy */
+            --score-text-color: #fff;
+            --message-bg: rgba(0, 0, 0, 0.7);
+            --button-bg: #e94560;
+            --button-hover-bg: #c9354e;
+            --theme-button-bg: #4a4a4a;
+            --theme-button-hover-bg: #6a6a6a;
+            --falling-reward-color: #ffd700; /* Màu chữ 5 triệu */
+            --snow-color: rgba(255, 255, 255, 0.8); /* Màu tuyết sáng */
+
+            /* Minesweeper Specific */
+            --cell-bg: #666;
+            --cell-border-light: #aaa;
+            --cell-border-dark: #333;
+            --cell-revealed-bg: #bbb;
+            --cell-mine-color: red;
+            --cell-flag-color: #008000;
+            --cell-exploded-bg: #f00;
+
+            --number-1: #0000ff; /* Blue */
+            --number-2: #008000; /* Green */
+            --number-3: #ff0000; /* Red */
+            --number-4: #000080; /* Dark blue */
+            --number-5: #800000; /* Maroon */
+            --number-6: #008080; /* Teal */
+            --number-7: #000; /* Black */
+            --number-8: #808080; /* Gray */
+        }
+
+        /* Light Theme Variables */
+        body.light-mode {
+            --bg-primary: #f0f2f5;
+            --text-color-primary: #333;
+            --game-container-bg: #e6e8eb;
+            --menu-overlay-bg: rgba(255, 255, 255, 0.9);
+            --intro-bg: #f8f8f8;
+            --accent-color: #4CAF50; /* Green accent */
+            --accent-color-hover: #45a049;
+            --j97-color: #FFA000; /* Darker yellow */
+            --ground-color: #f0f0f0;
+            --ground-border-color: #666;
+            --score-text-color: #333;
+            --message-bg: rgba(255, 255, 255, 0.9);
+            --button-bg: #4CAF50;
+            --button-hover-bg: #45a049;
+            --theme-button-bg: #d0d0d0;
+            --theme-button-hover-bg: #c0c0c0;
+            --falling-reward-color: #FFA000;
+            --snow-color: rgba(0, 0, 0, 0.3);
+
+            /* Minesweeper Specific */
+            --cell-bg: #d0d0d0;
+            --cell-border-light: #fff;
+            --cell-border-dark: #999;
+            --cell-revealed-bg: #e0e0e0;
+            --cell-mine-color: red;
+            --cell-flag-color: #00a000;
+            --cell-exploded-bg: #ff4d4d;
+        }
+
+        /* --- Global Styles --- */
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: var(--bg-primary);
+            font-family: 'Oxanium', sans-serif;
+            overflow: hidden;
+            color: var(--text-color-primary);
+            transition: background-color 0.5s ease, color 0.5s ease;
+        }
+
+        #game-container {
+            width: 90%; /* Chiếm 90% chiều rộng màn hình */
+            max-width: 1200px; /* Giới hạn chiều rộng tối đa */
+            height: 80vh; /* Chiếm 80% chiều cao viewport */
+            min-height: 500px; /* Chiều cao tối thiểu */
+            background-color: var(--game-container-bg);
+            position: relative;
+            overflow: hidden; /* Quan trọng để ẩn các phần tử con vượt ra ngoài */
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.7);
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start; /* Căn nội dung lên đầu (HUD, board) */
+            align-items: center; /* Căn giữa theo chiều ngang */
+            transition: background-color 0.5s ease; /* Không transition width/height nữa */
+            padding: 20px;
+            box-sizing: border-box; /* Tính padding vào kích thước */
+        }
+
+        /* --- Intro Screen --- */
+        #intro-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--intro-bg);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 1s ease-out, visibility 1s ease-out, background-color 0.5s ease;
+            z-index: 100;
+        }
+        #intro-screen.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+        #intro-screen.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+        .intro-line {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 3.5em;
+            font-weight: 700;
+            color: var(--accent-color);
+            text-shadow: 0 0 15px var(--accent-color);
+            opacity: 0; /* Start hidden */
+            transform: translateY(20px) scale(0.8); /* Start slightly off */
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out, color 0.5s ease, text-shadow 0.5s ease;
+        }
+        /* No specific .intro-screen.visible .intro-line rules needed if JS sets styles directly */
+
+
+        /* --- Main Menu Screen --- */
+        #menu-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--menu-overlay-bg);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.5s ease-out, visibility 0.5s ease-out, background-color 0.5s ease;
+            z-index: 90;
+        }
+        #menu-screen.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .menu-title {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 2.8em;
+            font-weight: 700;
+            color: var(--accent-color);
+            text-shadow: 0 0 8px var(--accent-color);
+            margin-bottom: 40px;
+            transition: color 0.5s ease, text-shadow 0.5s ease;
+        }
+
+        .menu-button, .difficulty-button, .game-button, .back-to-menu-button {
+            background-color: var(--button-bg);
+            color: white;
+            padding: 15px 30px;
+            margin: 10px 0; /* Adjusted margin */
+            border: none;
+            border-radius: 8px;
+            font-family: 'Oxanium', sans-serif;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            width: 250px; /* Wider buttons */
+            text-transform: uppercase;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            transition: background-color 0.3s ease, transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        .menu-button:hover, .difficulty-button:hover, .game-button:hover, .back-to-menu-button:hover {
+            background-color: var(--button-hover-bg);
+            transform: translateY(-3px);
+        }
+
+        #theme-toggle-button-menu {
+            background-color: var(--theme-button-bg);
+            color: var(--text-color-primary);
+            margin-top: 20px;
+            transition: background-color 0.3s ease, color 0.5s ease;
+        }
+        #theme-toggle-button-menu:hover {
+            background-color: var(--theme-button-hover-bg);
+        }
+
+        /* High Score & Top Players */
+        #high-score-display, #top-players-display {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--menu-overlay-bg);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            color: var(--text-color-primary);
+            font-size: 1.1em;
+            z-index: 95;
+            transition: background-color 0.5s ease, color 0.5s ease;
+        }
+        #high-score-display.visible, #top-players-display.visible {
+            display: flex;
+        }
+        #high-score-display h3, #top-players-display h3 {
+            font-family: 'Rajdhani', sans-serif;
+            color: var(--falling-reward-color);
+            margin-bottom: 15px;
+            font-size: 1.8em;
+            text-shadow: 1px 1px 0 #000;
+            transition: color 0.5s ease;
+        }
+        #top-players-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            width: 80%;
+            max-width: 300px;
+        }
+        #top-players-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        #top-players-list li:last-child {
+            border-bottom: none;
+        }
+        #top-players-list li span:first-child {
+            font-weight: bold;
+            color: var(--accent-color);
+        }
+        #top-players-list li span:last-child {
+            color: var(--text-color-primary);
+        }
+
+        .back-to-menu-button {
+            background-color: var(--theme-button-bg);
+            margin-top: 20px;
+            transition: background-color 0.3s ease, color 0.5s ease;
+        }
+        .back-to-menu-button:hover {
+            background-color: var(--theme-button-hover-bg);
+        }
+
+        /* --- Difficulty Select Screen --- */
+        #difficulty-select-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--menu-overlay-bg);
+            display: none; /* Hidden by default */
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            z-index: 95;
+            transition: opacity 0.5s ease-out, visibility 0.5s ease-out, background-color 0.5s ease;
+        }
+        #difficulty-select-screen.visible {
+            display: flex;
+        }
+        #difficulty-select-screen h3 {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 2.2em;
+            font-weight: 700;
+            color: var(--accent-color);
+            text-shadow: 0 0 8px var(--accent-color);
+            margin-bottom: 20px;
+            transition: color 0.5s ease, text-shadow 0.5s ease;
+        }
+
+
+        /* --- Minesweeper Game Specific Styles --- */
+        #minesweeper-game {
+            display: none; /* Hidden by default */
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start; /* HUD và bảng lên trên */
+            gap: 15px;
+            padding: 20px;
+            box-sizing: border-box;
+            width: 100%; /* Chiếm toàn bộ chiều rộng của game-container */
+            height: 100%; /* Chiếm toàn bộ chiều cao của game-container */
+            overflow: auto; /* Cho phép cuộn nếu nội dung vượt quá */
+        }
+        #minesweeper-game.visible {
+            display: flex;
+        }
+
+        #hud {
+            display: flex;
+            justify-content: space-between;
+            width: 90%; /* Hoặc một giá trị cố định để không bị quá rộng */
+            max-width: calc(30px * var(--board-cols, 9)); /* Sẽ được set bằng JS để khớp với board */
+            margin-bottom: 10px;
+            font-size: 1.5em;
+            font-weight: bold;
+            color: var(--score-text-color);
+            text-shadow: 1px 1px 0 #000;
+            z-index: 10;
+        }
+        #hud div {
+            padding: 5px 10px;
+            background-color: rgba(0,0,0,0.3);
+            border-radius: 5px;
+        }
+
+        #minesweeper-board {
+            display: grid;
+            border-top: 2px solid var(--cell-border-dark);
+            border-left: 2px solid var(--cell-border-dark);
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.5);
+            margin: auto; /* Center the board */
+            transition: border-color 0.5s ease;
+            flex-shrink: 0; /* Quan trọng: ngăn bảng bị co lại */
+        }
+
+        .cell {
+            width: 30px; /* Fixed cell size */
+            height: 30px;
+            background-color: var(--cell-bg);
+            border-right: 2px solid var(--cell-border-light);
+            border-bottom: 2px solid var(--cell-border-light);
+            border-top: 2px solid var(--cell-border-dark);
+            border-left: 2px solid var(--cell-border-dark);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Oxanium', sans-serif;
+            font-weight: bold;
+            font-size: 1.2em;
+            cursor: pointer;
+            user-select: none;
+            transition: background-color 0.1s ease, border-color 0.5s ease;
+        }
+
+        .cell.revealed {
+            background-color: var(--cell-revealed-bg);
+            border: 1px solid var(--cell-border-dark); /* Simpler border when revealed */
+            cursor: default;
+            transition: background-color 0.1s ease, border-color 0.5s ease;
+        }
+
+        .cell.flagged {
+            background-color: var(--cell-bg);
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text x="50" y="75" font-family="Arial" font-size="70" fill="%23e94560" text-anchor="middle">J97</text></svg>'); /* Placeholder J97 Flag */
+            background-size: 80%;
+            background-position: center;
+            background-repeat: no-repeat;
+            color: transparent; /* Hide text */
+        }
+        body.light-mode .cell.flagged {
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text x="50" y="75" font-family="Arial" font-size="70" fill="%234CAF50" text-anchor="middle">J97</text></svg>'); /* Green for light mode */
+        }
+
+
+        .cell.mine {
+            background-color: var(--cell-revealed-bg); /* Revealed mine background */
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="black"/><rect x="45" y="10" width="10" height="20" fill="black"/><rect x="45" y="70" width="10" height="20" fill="black"/><rect x="10" y="45" width="20" height="10" fill="black"/><rect x="70" y="45" width="20" height="10" fill="black"/><circle cx="50" cy="50" r="10" fill="red"/></svg>'); /* Simple bomb SVG */
+            background-size: 60%;
+            background-position: center;
+            background-repeat: no-repeat;
+            color: transparent;
+        }
+
+        .cell.exploded {
+            background-color: var(--cell-exploded-bg); /* Red background for exploded mine */
+        }
+
+        /* Number colors */
+        .cell.n1 { color: var(--number-1); }
+        .cell.n2 { color: var(--number-2); }
+        .cell.n3 { color: var(--number-3); }
+        .cell.n4 { color: var(--number-4); }
+        .cell.n5 { color: var(--number-5); }
+        .cell.n6 { color: var(--number-6); }
+        .cell.n7 { color: var(--number-7); }
+        .cell.n8 { color: var(--number-8); }
+
+        /* --- Game Messages --- */
+        .game-message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: var(--message-bg);
+            padding: 30px 40px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 1.6em;
+            font-weight: bold;
+            color: var(--text-color-primary);
+            box-shadow: 0 0 15px rgba(0,0,0,0.5);
+            z-index: 20;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            transition: background-color 0.5s ease, color 0.5s ease;
+        }
+
+        /* --- Explosion Effect --- */
+        @keyframes explode {
+            0% { transform: scale(0); opacity: 1; }
+            50% { transform: scale(1.5); opacity: 0.8; }
+            100% { transform: scale(2); opacity: 0; }
+        }
+
+        .explosion-fx {
+            position: absolute;
+            background-color: rgba(255, 165, 0, 0.7); /* Orange glow */
+            border-radius: 50%;
+            animation: explode 0.5s ease-out forwards;
+            pointer-events: none;
+            z-index: 50;
+        }
+
+        @keyframes popAndFade {
+            0% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-50px) scale(1.5); /* Bay lên trên và phóng to, rồi fade */
+            }
+        }
+        .explosion-text {
+            position: absolute;
+            font-size: 2.5em;
+            font-weight: bold;
+            color: red;
+            text-shadow: 2px 2px 5px black;
+            animation: popAndFade 1.5s ease-out forwards;
+            pointer-events: none;
+            z-index: 51;
+            white-space: nowrap;
+        }
+
+        /* Canvas cho hiệu ứng tuyết rơi */
+        #snow-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1; /* Đảm bảo tuyết rơi phía sau các yếu tố game chính */
+            pointer-events: none; /* Không chặn tương tác chuột/phím */
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <canvas id="snow-canvas"></canvas>
+
+        <div id="intro-screen">
+            <div class="intro-line line-1">Hành trình</div>
+            <div class="intro-line line-2">Tìm con</div>
+        </div>
+
+        <div id="menu-screen">
+            <div class="menu-title">J97 Dò Mìn</div>
+            <button class="menu-button" id="new-game-button">Chơi mới</button>
+            <button class="menu-button" id="high-score-button">Kỷ lục</button>
+            <button class="menu-button" id="top-players-button">Top Server97</button>
+            <button class="menu-button" id="theme-toggle-button-menu">Chế độ Sáng/Tối</button>
+            <button class="menu-button" id="continue-game-button" style="display:none;">Tiếp tục</button>
+        </div>
+
+        <div id="high-score-display">
+            <h3>Kỷ lục của bạn</h3>
+            <p>Điểm cao nhất: <span id="personal-high-score">0</span></p>
+            <button class="back-to-menu-button" onclick="showMenu()">Quay lại Menu</button>
+        </div>
+
+        <div id="top-players-display">
+            <h3>Top Server97</h3>
+            <ul id="top-players-list">
+                </ul>
+            <button class="back-to-menu-button" onclick="showMenu()">Quay lại Menu</button>
+        </div>
+
+        <div id="difficulty-select-screen">
+            <h3>Chọn độ khó</h3>
+            <button class="difficulty-button" data-difficulty="EASY">Dễ (9x9, 10 mìn)</button>
+            <button class="difficulty-button" data-difficulty="MEDIUM">Vừa (16x16, 40 mìn)</button>
+            <button class="difficulty-button" data-difficulty="ASIAN">Người Châu Á (30x20, 150 mìn)</button>
+            <button class="back-to-menu-button" onclick="showMenu()">Quay lại Menu</button>
+        </div>
+
+        <div id="minesweeper-game">
+            <div id="hud">
+                <div id="mine-count">Mìn: 0</div>
+                <div id="timer">Thời gian: 0s</div>
+            </div>
+            <div id="minesweeper-board">
+                </div>
+            <div id="win-message" class="game-message" style="display: none;">
+                Chúc mừng! Bạn đã phá đảo bảng thanh âm của J97!
+                <button class="game-button restart-game-button">Chơi lại</button>
+                 <button class="game-button back-to-menu-button" onclick="showMenu()">Menu chính</button>
+                 <button class="game-button exit-game-button">Thoát</button>
+            </div>
+            <div id="lose-message" class="game-message" style="display: none;">
+                Ối không! j97 đã chạm phải "beSOL" (- 5 TRIỆU)!
+                <button class="game-button restart-game-button">Chơi lại</button>
+                <button class="game-button back-to-menu-button" onclick="showMenu()">Menu chính</button>
+                <button class="game-button exit-game-button">Thoát</button>
+            </div>
+            <button id="exit-game-button-ingame" class="game-button" style="display:none; position:absolute; top:20px; left:20px;">Thoát</button>
+        </div>
+    </div>
+
+    <script>
+        const gameContainer = document.getElementById('game-container');
+        const introScreen = document.getElementById('intro-screen');
+        const menuScreen = document.getElementById('menu-screen');
+        const highScoreDisplay = document.getElementById('high-score-display');
+        const personalHighScoreDisplay = document.getElementById('personal-high-score');
+        const topPlayersDisplay = document.getElementById('top-players-display');
+        const topPlayersList = document.getElementById('top-players-list');
+        const difficultySelectScreen = document.getElementById('difficulty-select-screen');
+
+        const minesweeperGame = document.getElementById('minesweeper-game');
+        const minesweeperBoard = document.getElementById('minesweeper-board');
+        const mineCountDisplay = document.getElementById('mine-count');
+        const timerDisplay = document.getElementById('timer');
+        const winMessage = document.getElementById('win-message');
+        const loseMessage = document.getElementById('lose-message');
+
+        const themeToggleButtonMenu = document.getElementById('theme-toggle-button-menu');
+        const newGameButton = document.getElementById('new-game-button');
+        const highScoreButton = document.getElementById('high-score-button');
+        const topPlayersButton = document.getElementById('top-players-button');
+        const difficultyButtons = document.querySelectorAll('.difficulty-button');
+        const continueGameButton = document.getElementById('continue-game-button'); // Nút tiếp tục
+        const exitGameButtons = document.querySelectorAll('.exit-game-button'); // Các nút thoát trong message (win/lose)
+        const exitGameButtonIngame = document.getElementById('exit-game-button-ingame'); // Nút thoát trong khi chơi
+
+        // --- Game Variables ---
+        let board = [];
+        let rows = 0;
+        let cols = 0;
+        let totalMines = 0;
+        let flagsPlaced = 0;
+        let revealedCellsCount = 0;
+        let gameRunning = false;
+        let timer = 0;
+        let timerInterval;
+        let firstClick = true; // To ensure first click is never a mine
+        let currentDifficulty = 'EASY'; // Store current difficulty for saving
+
+        const CELL_SIZE = 30; // pixels
+
+        let personalHighScore = localStorage.getItem('j97MinesweeperHighScore') ? parseInt(localStorage.getItem('j97MinesweeperHighScore')) : 0; // Using time as high score
+
+        const DIFFICULTIES = {
+            EASY: { rows: 9, cols: 9, mines: 10 },
+            MEDIUM: { rows: 16, cols: 16, mines: 40 },
+            ASIAN: { rows: 20, cols: 30, mines: 150 } // Increased difficulty for "Người Châu Á"
+        };
+
+        // --- Snowfall Variables (reused) ---
+        const snowCanvas = document.getElementById('snow-canvas');
+        const snowCtx = snowCanvas.getContext('2d');
+        let snowflakes = [];
+        const numSnowflakes = 100;
+        let currentSnowColor = 'rgba(255, 255, 255, 0.8)';
+
+        class Snowflake {
+            constructor() {
+                this.x = Math.random() * snowCanvas.width;
+                this.y = Math.random() * snowCanvas.height;
+                this.radius = Math.random() * 2 + 1;
+                this.speedY = Math.random() * 1 + 0.5;
+                this.speedX = Math.random() * 1 - 0.5;
+                this.opacity = Math.random() * 0.5 + 0.5;
+            }
+
+            draw() {
+                snowCtx.beginPath();
+                snowCtx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                snowCtx.fillStyle = currentSnowColor;
+                snowCtx.globalAlpha = this.opacity;
+                snowCtx.fill();
+            }
+
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+
+                if (this.y > snowCanvas.height + this.radius || this.x < -this.radius || this.x > snowCanvas.width + this.radius) {
+                    this.x = Math.random() * snowCanvas.width;
+                    this.y = -this.radius;
+                    this.speedY = Math.random() * 1 + 0.5;
+                    this.speedX = Math.random() * 1 - 0.5;
+                    this.opacity = Math.random() * 0.5 + 0.5;
+                }
+            }
+        }
+
+        function initSnowflakes() {
+            snowflakes = [];
+            for (let i = 0; i < numSnowflakes; i++) {
+                snowflakes.push(new Snowflake());
+            }
+        }
+
+        function drawSnow() {
+            snowCtx.clearRect(0, 0, snowCanvas.width, snowCanvas.height);
+            snowflakes.forEach(flake => {
+                flake.draw();
+                flake.update();
+            });
+            requestAnimationFrame(drawSnow);
+        }
+
+        // --- Default Top Players (reused) ---
+        const defaultTopPlayers = [
+            { name: "J97_Pro", score: 60 },
+            { name: "NoMine_Boss", score: 90 },
+            { name: "ThanhAm_OK", score: 120 },
+            { name: "Logic_God", score: 150 },
+            { name: "Asian_Master", score: 200 }
+        ];
+
+        // --- Theme Functions (reused) ---
+        function applyTheme(theme) {
+            if (theme === 'light') {
+                document.body.classList.add('light-mode');
+                themeToggleButtonMenu.textContent = 'Chế độ Tối';
+                currentSnowColor = 'rgba(0, 0, 0, 0.3)';
+            } else {
+                document.body.classList.remove('light-mode');
+                themeToggleButtonMenu.textContent = 'Chế độ Sáng';
+                currentSnowColor = 'rgba(255, 255, 255, 0.8)';
+            }
+            localStorage.setItem('j97RexTheme', theme); // Reuse theme key
+        }
+
+        function toggleTheme() {
+            const currentTheme = localStorage.getItem('j97RexTheme') || 'dark';
+            if (currentTheme === 'dark') {
+                applyTheme('light');
+            } else {
+                applyTheme('dark');
+            }
+        }
+
+        // --- Game Flow Functions ---
+
+        function hideAllScreens() {
+            // Đảm bảo tất cả các màn hình chính đều bị ẩn
+            introScreen.classList.remove('visible');
+            introScreen.classList.add('hidden'); // Dùng hidden để thêm pointer-events: none;
+            menuScreen.classList.remove('visible');
+            highScoreDisplay.classList.remove('visible');
+            topPlayersDisplay.classList.remove('visible');
+            difficultySelectScreen.classList.remove('visible');
+            minesweeperGame.classList.remove('visible'); // Ẩn hoàn toàn game area
+            winMessage.style.display = 'none';
+            loseMessage.style.display = 'none';
+            exitGameButtonIngame.style.display = 'none'; // Ẩn nút thoát trong game
+        }
+
+        function showIntro() {
+            hideAllScreens();
+            introScreen.classList.remove('hidden'); // Ensure it's not hidden initially
+            introScreen.classList.add('visible'); // Make intro screen visible
+
+            const line1 = introScreen.querySelector('.line-1');
+            const line2 = introScreen.querySelector('.line-2');
+
+            // Reset initial state for animation
+            line1.style.opacity = 0;
+            line1.style.transform = 'translateY(20px) scale(0.8)';
+            line2.style.opacity = 0;
+            line2.style.transform = 'translateY(20px) scale(0.8)';
+
+            // Trigger animations with small delays
+            setTimeout(() => {
+                line1.style.opacity = 1;
+                line1.style.transform = 'translateY(0) scale(1)';
+            }, 200); // Delay for first line
+
+            setTimeout(() => {
+                line2.style.opacity = 1;
+                line2.style.transform = 'translateY(0) scale(1)';
+            }, 600); // Delay for second line
+
+            // After total animation time + buffer, hide intro screen
+            setTimeout(() => {
+                introScreen.classList.remove('visible');
+                introScreen.classList.add('hidden');
+                setTimeout(showMenu, 1000); // Wait for fade out to complete before showing menu
+            }, 2500); // Total display time for intro
+        }
+
+        function showMenu() {
+            hideAllScreens();
+            menuScreen.classList.add('visible');
+            // Kiểm tra xem có game nào đang được lưu không để hiển thị nút "Tiếp tục"
+            if (localStorage.getItem('j97MinesweeperGameState')) {
+                continueGameButton.style.display = 'block';
+            } else {
+                continueGameButton.style.display = 'none';
+            }
+        }
+
+        function showDifficultySelect() {
+            hideAllScreens();
+            difficultySelectScreen.classList.add('visible');
+        }
+
+        function startGame(difficultyMode) {
+            hideAllScreens();
+            minesweeperGame.classList.add('visible');
+            exitGameButtonIngame.style.display = 'block'; // Hiển thị nút thoát trong game
+
+            currentDifficulty = difficultyMode; // Lưu lại độ khó hiện tại
+            rows = DIFFICULTIES[currentDifficulty].rows;
+            cols = DIFFICULTIES[currentDifficulty].cols;
+            totalMines = DIFFICULTIES[currentDifficulty].mines;
+
+            // Đặt biến CSS để HUD có thể căn chỉnh đúng kích thước board
+            minesweeperBoard.style.setProperty('--board-cols', cols); 
+            
+            initializeBoard();
+            updateHUD();
+            gameRunning = true;
+            firstClick = true; // Đảm bảo lần click đầu tiên không trúng mìn
+            timer = 0; // Đặt lại timer khi game mới
+            stopTimer(); // Đảm bảo timer đã dừng
+        }
+
+        function initializeBoard() {
+            minesweeperBoard.innerHTML = ''; // Clear previous board
+            minesweeperBoard.style.gridTemplateColumns = `repeat(${cols}, ${CELL_SIZE}px)`;
+            minesweeperBoard.style.gridTemplateRows = `repeat(${rows}, ${CELL_SIZE}px)`;
+
+            board = [];
+            revealedCellsCount = 0;
+            flagsPlaced = 0;
+            
+            for (let r = 0; r < rows; r++) {
+                board.push([]);
+                for (let c = 0; c < cols; c++) {
+                    const cellElement = document.createElement('div');
+                    cellElement.classList.add('cell');
+                    cellElement.dataset.row = r;
+                    cellElement.dataset.col = c;
+                    cellElement.addEventListener('click', handleCellClick);
+                    cellElement.addEventListener('contextmenu', handleCellRightClick);
+                    minesweeperBoard.appendChild(cellElement);
+
+                    board[r].push({
+                        isMine: false,
+                        isRevealed: false,
+                        isFlagged: false,
+                        minesAround: 0,
+                        element: cellElement // Link to DOM element
+                    });
+                }
+            }
+        }
+
+        function placeMines(initialClickRow, initialClickCol) {
+            let minesToPlace = totalMines;
+            while (minesToPlace > 0) {
+                const r = Math.floor(Math.random() * rows);
+                const c = Math.floor(Math.random() * cols);
+
+                // Ensure the first click and its immediate neighbors are not mines (3x3 safe zone)
+                const isNearFirstClick = (Math.abs(r - initialClickRow) <= 1 && Math.abs(c - initialClickCol) <= 1);
+
+                if (!board[r][c].isMine && !isNearFirstClick) {
+                    board[r][c].isMine = true;
+                    minesToPlace--;
+                }
+            }
+            calculateNumbers();
+        }
+
+        function calculateNumbers() {
+            for (let r = 0; r < rows; r++) {
+                for (let c = 0; c < cols; c++) {
+                    if (!board[r][c].isMine) {
+                        let count = 0;
+                        for (let dr = -1; dr <= 1; dr++) {
+                            for (let dc = -1; dc <= 1; dc++) {
+                                if (dr === 0 && dc === 0) continue;
+                                const nr = r + dr;
+                                const nc = c + dc;
+                                if (nr >= 0 && nr < rows && nc >= 0 && nc < cols && board[nr][nc].isMine) {
+                                    count++;
+                                }
+                            }
+                        }
+                        board[r][c].minesAround = count;
+                    }
+                }
+            }
+        }
+
+        function handleCellClick(event) {
+            if (!gameRunning) return;
+
+            const row = parseInt(this.dataset.row);
+            const col = parseInt(this.dataset.col);
+            const cell = board[row][col];
+
+            if (cell.isRevealed || cell.isFlagged) {
+                return;
+            }
+
+            if (firstClick) {
+                placeMines(row, col); // Place mines after first click
+                firstClick = false;
+                startTimer(); // Start timer only after first click
+            }
+
+            if (cell.isMine) {
+                revealMines(); // Show all mines
+                this.classList.add('exploded'); // Highlight the clicked mine
+                triggerExplosion(this);
+                gameOver(false); // Game Over, lose
+            } else {
+                revealCell(row, col);
+                checkWin();
+            }
+            updateHUD();
+        }
+
+        function handleCellRightClick(event) {
+            event.preventDefault(); // Prevent context menu
+            if (!gameRunning) return;
+
+            const row = parseInt(this.dataset.row);
+            const col = parseInt(this.dataset.col);
+            const cell = board[row][col];
+
+            if (cell.isRevealed) {
+                return;
+            }
+
+            cell.isFlagged = !cell.isFlagged;
+            if (cell.isFlagged) {
+                this.classList.add('flagged');
+                flagsPlaced++;
+            } else {
+                this.classList.remove('flagged');
+                flagsPlaced--;
+            }
+            updateHUD();
+        }
+
+        function revealCell(r, c) {
+            if (r < 0 || r >= rows || c < 0 || c >= cols) return; // Out of bounds
+            const cell = board[r][c];
+
+            if (cell.isRevealed || cell.isFlagged || cell.isMine) {
+                return;
+            }
+
+            cell.isRevealed = true;
+            cell.element.classList.add('revealed');
+            revealedCellsCount++;
+
+            if (cell.minesAround > 0) {
+                cell.element.textContent = cell.minesAround;
+                cell.element.classList.add(`n${cell.minesAround}`); // Add class for number styling
+            } else {
+                // If 0, recursively reveal neighbors
+                for (let dr = -1; dr <= 1; dr++) {
+                    for (let dc = -1; dc <= 1; dc++) {
+                        if (dr === 0 && dc === 0) continue;
+                        revealCell(r + dr, c + dc);
+                    }
+                }
+            }
+        }
+
+        function revealMines() {
+            for (let r = 0; r < rows; r++) {
+                for (let c = 0; c < cols; c++) {
+                    const cell = board[r][c];
+                    if (cell.isMine) {
+                        cell.element.classList.add('mine', 'revealed');
+                    }
+                    // Also reveal incorrectly flagged cells
+                    if (cell.isFlagged && !cell.isMine) {
+                        cell.element.classList.add('incorrect-flag'); // Add specific style if needed
+                    }
+                }
+            }
+        }
+
+        function updateHUD() {
+            mineCountDisplay.textContent = `Mìn: ${totalMines - flagsPlaced}`;
+            timerDisplay.textContent = `Thời gian: ${timer}s`;
+        }
+
+        function startTimer() {
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                timer++;
+                updateHUD();
+            }, 1000);
+        }
+
+        function stopTimer() {
+            if (timerInterval) clearInterval(timerInterval);
+        }
+
+        function checkWin() {
+            if (revealedCellsCount === (rows * cols - totalMines)) {
+                gameOver(true); // Game Over, win
+            }
+        }
+
+        function gameOver(won) {
+            gameRunning = false;
+            stopTimer();
+            
+            // Show all mines if lost
+            if (!won) {
+                revealMines();
+                loseMessage.style.display = 'flex';
+            } else {
+                winMessage.style.display = 'flex';
+                // Update High Score if won
+                if (timer < personalHighScore || personalHighScore === 0) {
+                    personalHighScore = timer;
+                    localStorage.setItem('j97MinesweeperHighScore', personalHighScore);
+                }
+            }
+            // Clear saved game state if game is won or lost
+            localStorage.removeItem('j97MinesweeperGameState');
+
+            // Add listeners to restart buttons on messages
+            document.querySelectorAll('.restart-game-button').forEach(button => {
+                button.onclick = () => {
+                    hideAllScreens();
+                    showDifficultySelect(); // Go back to difficulty select
+                };
+            });
+        }
+
+        function triggerExplosion(clickedCellElement) {
+            const explosionFx = document.createElement('div');
+            explosionFx.classList.add('explosion-fx');
+            
+            // Position explosion effect over the clicked cell
+            const rect = clickedCellElement.getBoundingClientRect();
+            const minesweeperGameRect = minesweeperGame.getBoundingClientRect(); // Lấy vị trí của minesweeper-game
+
+            // Tính toán vị trí tương đối với minesweeper-game
+            explosionFx.style.left = `${rect.left - minesweeperGameRect.left + rect.width / 2}px`;
+            explosionFx.style.top = `${rect.top - minesweeperGameRect.top + rect.height / 2}px`;
+            explosionFx.style.width = `0px`;
+            explosionFx.style.height = `0px`;
+            explosionFx.style.transform = `translate(-50%, -50%)`;
+
+            minesweeperGame.appendChild(explosionFx);
+
+            const explosionText = document.createElement('div');
+            explosionText.classList.add('explosion-text');
+            explosionText.textContent = '- 5 TRIỆU!';
+            // Vị trí text tương tự
+            explosionText.style.left = `${rect.left - minesweeperGameRect.left + rect.width / 2}px`;
+            explosionText.style.top = `${rect.top - minesweeperGameRect.top + rect.height / 2}px`;
+            explosionText.style.transform = `translate(-50%, -50%)`;
+            minesweeperGame.appendChild(explosionText);
+
+            explosionFx.addEventListener('animationend', () => explosionFx.remove());
+            explosionText.addEventListener('animationend', () => explosionText.remove());
+        }
+
+        // --- Save/Load Game State ---
+        function saveGameState() {
+            // Dừng timer trước khi lưu
+            stopTimer();
+
+            // Tạo một phiên bản serializable của board (không bao gồm DOM elements)
+            const serializableBoard = board.map(row =>
+                row.map(cell => ({
+                    isMine: cell.isMine,
+                    isRevealed: cell.isRevealed,
+                    isFlagged: cell.isFlagged,
+                    minesAround: cell.minesAround
+                }))
+            );
+
+            const gameState = {
+                board: serializableBoard,
+                rows: rows,
+                cols: cols,
+                totalMines: totalMines,
+                flagsPlaced: flagsPlaced,
+                revealedCellsCount: revealedCellsCount,
+                timer: timer,
+                difficulty: currentDifficulty, // Lưu độ khó hiện tại
+                gameRunning: gameRunning, // Lưu trạng thái gameRunning (true nếu đang chơi, false nếu thắng/thua)
+                firstClick: firstClick
+            };
+            localStorage.setItem('j97MinesweeperGameState', JSON.stringify(gameState));
+            console.log('Game state saved:', gameState); // Log để debug
+        }
+
+        function loadGameState() {
+            const savedState = localStorage.getItem('j97MinesweeperGameState');
+            if (savedState) {
+                const gameState = JSON.parse(savedState);
+
+                rows = gameState.rows;
+                cols = gameState.cols;
+                totalMines = gameState.totalMines;
+                flagsPlaced = gameState.flagsPlaced;
+                revealedCellsCount = gameState.revealedCellsCount;
+                timer = gameState.timer;
+                currentDifficulty = gameState.difficulty; // Khôi phục độ khó
+                gameRunning = gameState.gameRunning;
+                firstClick = gameState.firstClick;
+
+                minesweeperBoard.innerHTML = ''; // Xóa bảng hiện có
+                minesweeperBoard.style.gridTemplateColumns = `repeat(${cols}, ${CELL_SIZE}px)`;
+                minesweeperBoard.style.gridTemplateRows = `repeat(${rows}, ${CELL_SIZE}px)`;
+                minesweeperBoard.style.setProperty('--board-cols', cols); // Đặt lại CSS variable cho HUD
+
+                board = []; // Khởi tạo lại mảng board
+                for (let r = 0; r < rows; r++) {
+                    board.push([]);
+                    for (let c = 0; c < cols; c++) {
+                        const cellData = gameState.board[r][c]; // Lấy dữ liệu ô đã lưu
+
+                        const cellElement = document.createElement('div');
+                        cellElement.classList.add('cell');
+                        cellElement.dataset.row = r;
+                        cellElement.dataset.col = c;
+                        cellElement.addEventListener('click', handleCellClick);
+                        cellElement.addEventListener('contextmenu', handleCellRightClick);
+                        minesweeperBoard.appendChild(cellElement);
+
+                        // Áp dụng trạng thái đã lưu vào phần tử ô và đối tượng mới
+                        const cell = {
+                            isMine: cellData.isMine,
+                            isRevealed: cellData.isRevealed,
+                            isFlagged: cellData.isFlagged,
+                            minesAround: cellData.minesAround,
+                            element: cellElement // Liên kết với DOM element mới tạo
+                        };
+                        board[r].push(cell);
+
+                        // Cập nhật giao diện ô dựa trên trạng thái đã tải
+                        if (cell.isRevealed) {
+                            cell.element.classList.add('revealed');
+                            if (cell.minesAround > 0) {
+                                cell.element.textContent = cell.minesAround;
+                                cell.element.classList.add(`n${cell.minesAround}`);
+                            }
+                        }
+                        if (cell.isFlagged) {
+                            cell.element.classList.add('flagged');
+                        }
+                        // Nếu là mìn đã nổ thì không cần xử lý ở đây, vì khi game over, state sẽ bị xóa.
+                    }
+                }
+
+                // Khôi phục HUD và timer
+                updateHUD();
+                // Nếu game đang chạy, tiếp tục timer
+                if (gameRunning) {
+                    startTimer();
+                    exitGameButtonIngame.style.display = 'block'; // Hiển thị lại nút thoát trong game
+                } else {
+                    stopTimer(); // Đảm bảo timer đã dừng nếu game đã kết thúc (thắng/thua)
+                    exitGameButtonIngame.style.display = 'none';
+                }
+
+                minesweeperGame.classList.add('visible'); // Hiển thị màn hình game
+                console.log('Game state loaded:', gameState); // Log để debug
+                return true; // Trạng thái đã tải thành công
+            }
+            return false; // Không tìm thấy trạng thái đã lưu
+        }
+
+        // Chức năng thoát game
+        function exitGame() {
+            if (gameRunning) { // Chỉ lưu nếu game đang chạy dở
+                saveGameState();
+            } else {
+                // Nếu game không chạy (ví dụ: đã thắng/thua), xóa trạng thái đã lưu
+                localStorage.removeItem('j97MinesweeperGameState');
+            }
+            showMenu(); // Quay lại menu
+        }
+
+        // --- Event Listeners ---
+        newGameButton.addEventListener('click', () => {
+            localStorage.removeItem('j97MinesweeperGameState'); // Xóa game đã lưu khi chọn game mới
+            showDifficultySelect();
+        });
+
+        difficultyButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const difficulty = button.dataset.difficulty;
+                startGame(difficulty);
+            });
+        });
+
+        highScoreButton.addEventListener('click', () => {
+            hideAllScreens();
+            highScoreDisplay.classList.add('visible');
+            // High score for Minesweeper is shortest time (smaller is better)
+            personalHighScoreDisplay.textContent = personalHighScore === 0 ? 'Chưa có' : `${personalHighScore}s`;
+        });
+
+        topPlayersButton.addEventListener('click', () => {
+            hideAllScreens();
+            topPlayersDisplay.classList.add('visible');
+            topPlayersList.innerHTML = '';
+            // For Minesweeper, high score is low time, so sort ascending
+            const sortedTopPlayers = [...defaultTopPlayers].sort((a, b) => a.score - b.score);
+
+            sortedTopPlayers.forEach((player, index) => {
+                const li = document.createElement('li');
+                li.innerHTML = `<span>${index + 1}. ${player.name}</span><span>${player.score}s</span>`;
+                topPlayersList.appendChild(li);
+            });
+        });
+
+        themeToggleButtonMenu.addEventListener('click', toggleTheme);
+
+        // Nút tiếp tục game
+        continueGameButton.addEventListener('click', () => {
+            hideAllScreens();
+            if (!loadGameState()) { // Thử tải game state
+                alert('Không tìm thấy game đã lưu. Bắt đầu game mới.');
+                showDifficultySelect(); // Nếu không tải được, chuyển sang chọn độ khó
+            }
+            // Nếu tải thành công, loadGameState đã tự hiển thị minesweeperGame
+        });
+
+        // Gắn sự kiện cho các nút thoát
+        exitGameButtons.forEach(button => {
+            button.addEventListener('click', exitGame);
+        });
+        exitGameButtonIngame.addEventListener('click', exitGame);
+
+        // --- Initial Setup ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // Dynamically set canvas size to match gameContainer
+            const resizeCanvas = () => {
+                snowCanvas.width = gameContainer.offsetWidth;
+                snowCanvas.height = gameContainer.offsetHeight;
+                initSnowflakes(); // Reinitialize snowflakes for new size
+            };
+
+            // Call once on load
+            resizeCanvas();
+            // Call on window resize
+            window.addEventListener('resize', resizeCanvas);
+
+            drawSnow();
+
+            const savedTheme = localStorage.getItem('j97RexTheme') || 'dark';
+            applyTheme(savedTheme);
+
+            // Bắt đầu với intro screen
+            showIntro();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flappy J97 Demo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Oxanium:wght@400;700&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        /* --- CSS Variables cho Dark và Light Mode --- */
+        /* Default (Dark) Theme Variables */
+        :root {
+            --bg-primary: #1a1a2e; /* body background */
+            --text-color-primary: #e0e0e0; /* general text color */
+            --game-container-bg: #3e3e4a; /* game-container background */
+            --menu-overlay-bg: rgba(15, 15, 28, 0.9); /* menu-screen background */
+            --intro-bg: #0f0f1c; /* intro-screen background */
+            --accent-color: #e94560; /* main accent color for buttons, titles */
+            --accent-color-hover: #c9354e;
+            --j97-color: #ffd700;
+            --pipe-color: #FF5733;
+            --pipe-border-color: #C70039;
+            --pipe-text-color: #FFD700;
+            --score-text-color: #fff;
+            --message-bg: rgba(0, 0, 0, 0.7);
+            --high-score-bg: rgba(0, 0, 0, 0.8);
+            --high-score-title-color: #ffd700;
+            --list-border-color: rgba(255, 255, 255, 0.1);
+            --list-item-score-color: #b0b0b0;
+            --back-button-bg: #5a6a7a;
+            --back-button-hover-bg: #4a5a6a;
+            --theme-button-bg: #4a4a4a;
+            --theme-button-hover-bg: #6a6a6a;
+        }
+
+        /* Light Theme Variables */
+        body.light-mode {
+            --bg-primary: #f0f2f5;
+            --text-color-primary: #333;
+            --game-container-bg: #e6e8eb;
+            --menu-overlay-bg: rgba(255, 255, 255, 0.9);
+            --intro-bg: #f8f8f8;
+            --accent-color: #4CAF50; /* Green accent */
+            --accent-color-hover: #45a049;
+            --j97-color: #FFA000; /* Darker yellow */
+            --pipe-color: #8BC34A; /* Green pipe */
+            --pipe-border-color: #689F38;
+            --pipe-text-color: #333; /* Darker text on light pipe */
+            --score-text-color: #333;
+            --message-bg: rgba(255, 255, 255, 0.9);
+            --high-score-bg: rgba(255, 255, 255, 0.95);
+            --high-score-title-color: #4CAF50;
+            --list-border-color: rgba(0, 0, 0, 0.1);
+            --list-item-score-color: #666;
+            --back-button-bg: #9E9E9E;
+            --back-button-hover-bg: #757575;
+            --theme-button-bg: #d0d0d0;
+            --theme-button-hover-bg: #c0c0c0;
+        }
+
+        /* --- Global Styles --- */
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: var(--bg-primary); /* Sử dụng biến */
+            font-family: 'Oxanium', sans-serif;
+            overflow: hidden;
+            color: var(--text-color-primary); /* Sử dụng biến */
+            transition: background-color 0.5s ease, color 0.5s ease; /* Chuyển đổi mượt mà */
+        }
+
+        #game-container {
+            width: 320px; /* Default for mobile */
+            height: 480px; /* Default for mobile */
+            background-color: var(--game-container-bg); /* Sử dụng biến */
+            border: 2px solid #555;
+            overflow: hidden;
+            position: relative;
+            cursor: pointer;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.7);
+            border-radius: 10px;
+            transition: background-color 0.5s ease, width 0.3s ease, height 0.3s ease; /* Transition cho kích thước */
+        }
+
+        /* --- Intro Screen --- */
+        #intro-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--intro-bg); /* Sử dụng biến */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 1s ease-out, visibility 1s ease-out, background-color 0.5s ease;
+            z-index: 100;
+        }
+        #intro-screen.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+        #intro-screen.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .intro-line {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 3em; /* Default for mobile */
+            font-weight: 700;
+            color: var(--accent-color); /* Sử dụng biến */
+            text-shadow: 0 0 15px var(--accent-color); /* Sử dụng biến */
+            opacity: 0;
+            transform: translateY(20px) scale(0.8);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out, color 0.5s ease, text-shadow 0.5s ease;
+        }
+        #intro-screen.visible .intro-line.line-1 {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            transition-delay: 0.2s;
+        }
+        #intro-screen.visible .intro-line.line-2 {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            transition-delay: 0.6s;
+        }
+
+
+        /* --- Main Menu Screen --- */
+        #menu-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--menu-overlay-bg); /* Sử dụng biến */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.5s ease-out, visibility 0.5s ease-out, background-color 0.5s ease;
+            z-index: 90;
+        }
+        #menu-screen.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .menu-title {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 2.8em; /* Default for mobile */
+            font-weight: 700;
+            color: var(--accent-color); /* Sử dụng biến */
+            text-shadow: 0 0 8px var(--accent-color); /* Sử dụng biến */
+            margin-bottom: 40px;
+            transition: color 0.5s ease, text-shadow 0.5s ease;
+        }
+
+        .menu-button {
+            background-color: var(--accent-color); /* Sử dụng biến */
+            color: white; /* Vẫn giữ màu trắng cho chữ trên nút chính */
+            padding: 15px 30px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Oxanium', sans-serif;
+            font-size: 1.2em; /* Default for mobile */
+            font-weight: bold;
+            cursor: pointer;
+            width: 200px; /* Default for mobile */
+            text-transform: uppercase;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            transition: background-color 0.3s ease, transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        .menu-button:hover {
+            background-color: var(--accent-color-hover); /* Sử dụng biến */
+            transform: translateY(-3px);
+        }
+
+        #theme-toggle-button {
+            background-color: var(--theme-button-bg); /* Biến riêng cho nút theme */
+            color: var(--text-color-primary); /* Chữ màu theo theme */
+            padding: 10px 20px;
+            margin-top: 20px;
+            font-size: 1em; /* Default for mobile */
+            width: 200px; /* Cùng width với các nút khác */
+            transition: background-color 0.3s ease, color 0.5s ease;
+        }
+        #theme-toggle-button:hover {
+            background-color: var(--theme-button-hover-bg); /* Biến riêng cho nút theme hover */
+        }
+
+
+        /* --- Game Elements --- */
+        #j97 {
+            position: absolute;
+            width: 40px;
+            height: 30px;
+            background-color: var(--j97-color); /* Sử dụng biến */
+            border-radius: 5px;
+            left: 50px;
+            top: 200px;
+            transition: transform 0.1s ease-out; /* Chỉ chuyển động xoay */
+            z-index: 5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            color: #333; /* Giữ màu đen cho chữ trên J97 */
+            font-size: 0.8em;
+            text-shadow: 1px 1px 0 #fff;
+        }
+
+        .pipe {
+            position: absolute;
+            width: 60px; /* Default for mobile */
+            background-color: var(--pipe-color); /* Sử dụng biến */
+            border: 2px solid var(--pipe-border-color); /* Sử dụng biến */
+            box-sizing: border-box;
+            overflow: hidden;
+            transition: background-color 0.5s ease, border-color 0.5s ease, width 0.3s ease; /* Transition cho kích thước */
+        }
+
+        .pipe.bottom {
+            bottom: 0;
+        }
+
+        .pipe.top {
+            top: 0;
+        }
+        
+        .pipe-content-wrapper {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .pipe-text {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.6em; /* Default for mobile */
+            font-weight: 700;
+            color: var(--pipe-text-color); /* Sử dụng biến */
+            text-shadow: 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000;
+            white-space: nowrap;
+            position: relative;
+            transition: color 0.5s ease;
+        }
+
+        /* Hiệu ứng rơi chữ ngẫu nhiên (5 TRIỆU / BÉ SOL) */
+        .falling-reward-text {
+            position: absolute;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 2.5em; /* Default for mobile */
+            font-weight: 700;
+            color: var(--j97-color); /* Vàng sáng */
+            text-shadow: 2px 2px 5px rgba(0,0,0,0.8), 0 0 15px var(--accent-color); /* Hiệu ứng phát sáng theo accent */
+            animation: fallAndFade 1.5s forwards ease-out;
+            z-index: 20;
+            pointer-events: none;
+            white-space: nowrap;
+            transition: color 0.5s ease, text-shadow 0.5s ease;
+        }
+
+        @keyframes fallAndFade {
+            0% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(100px) scale(1.5);
+            }
+        }
+
+
+        #score-display {
+            position: absolute;
+            top: 20px;
+            width: 100%;
+            text-align: center;
+            font-size: 2.8em; /* Default for mobile */
+            font-weight: bold;
+            color: var(--score-text-color); /* Sử dụng biến */
+            text-shadow: 3px 3px 0 #000;
+            z-index: 10;
+            transition: color 0.5s ease;
+        }
+
+        #start-message, #game-over-message {
+            position: absolute;
+            width: 100%;
+            text-align: center;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.5em; /* Default for mobile */
+            font-weight: bold;
+            color: var(--score-text-color); /* Sử dụng biến */
+            text-shadow: 2px 2px 0 #000;
+            z-index: 11;
+            padding: 15px;
+            background-color: var(--message-bg); /* Sử dụng biến */
+            border-radius: 8px;
+            box-sizing: border-box;
+            transition: background-color 0.5s ease, color 0.5s ease;
+        }
+        #game-over-message {
+            display: none;
+        }
+        #game-over-message button {
+            margin-top: 25px;
+            padding: 12px 25px;
+            font-size: 1.1em; /* Default for mobile */
+            font-weight: bold;
+            background-color: var(--accent-color); /* Sử dụng biến */
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        #game-over-message button:hover {
+            background-color: var(--accent-color-hover); /* Sử dụng biến */
+        }
+
+        /* High Score & Top Players */
+        #high-score-display, #top-players-display {
+            position: absolute;
+            width: 100%;
+            text-align: center;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: var(--high-score-bg); /* Sử dụng biến */
+            padding: 20px;
+            border-radius: 10px;
+            box-sizing: border-box;
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+            color: var(--text-color-primary); /* Sử dụng biến */
+            font-size: 1.1em; /* Default for mobile */
+            transition: background-color 0.5s ease, color 0.5s ease;
+        }
+        #high-score-display h3, #top-players-display h3 {
+            font-family: 'Rajdhani', sans-serif;
+            color: var(--high-score-title-color); /* Sử dụng biến */
+            margin-bottom: 15px;
+            font-size: 1.8em; /* Default for mobile */
+            text-shadow: 1px 1px 0 #000;
+            transition: color 0.5s ease;
+        }
+        #top-players-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        #top-players-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid var(--list-border-color); /* Sử dụng biến */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        #top-players-list li:last-child {
+            border-bottom: none;
+        }
+        #top-players-list li span:first-child {
+            font-weight: bold;
+            color: var(--accent-color); /* Sử dụng biến */
+        }
+        #top-players-list li span:last-child {
+            color: var(--list-item-score-color); /* Sử dụng biến */
+        }
+
+        .back-to-menu-button {
+            background-color: var(--back-button-bg); /* Sử dụng biến */
+            margin-top: 20px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            color: white; /* Vẫn giữ màu trắng cho chữ trên nút */
+            font-size: 1em; /* Default for mobile */
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .back-to-menu-button:hover {
+            background-color: var(--back-button-hover-bg); /* Sử dụng biến */
+        }
+
+        /* --- Desktop Specific Styles (min-width: 768px) --- */
+        @media (min-width: 768px) {
+            #game-container {
+                width: 400px; /* Lớn hơn cho desktop */
+                height: 600px; /* Lớn hơn cho desktop */
+                box-shadow: 0 0 50px rgba(0, 0, 0, 0.8); /* Bóng đổ mạnh hơn */
+            }
+
+            .intro-line {
+                font-size: 4.5em; /* Chữ intro to hơn */
+            }
+
+            .menu-title {
+                font-size: 3.5em; /* Title menu to hơn */
+            }
+
+            .menu-button {
+                padding: 18px 35px;
+                font-size: 1.4em;
+                width: 250px; /* Nút to hơn */
+            }
+
+            #theme-toggle-button {
+                padding: 12px 25px;
+                font-size: 1.1em;
+                width: 250px;
+            }
+
+            #j97 {
+                width: 50px; /* J97 to hơn */
+                height: 38px;
+                font-size: 1em;
+            }
+
+            .pipe {
+                width: 70px; /* Ống to hơn */
+            }
+
+            .pipe-text {
+                font-size: 2.2em; /* Chữ trên ống to hơn */
+            }
+
+            .falling-reward-text {
+                font-size: 3.5em; /* Chữ rơi to hơn */
+            }
+
+            #score-display {
+                font-size: 3.5em; /* Điểm to hơn */
+            }
+
+            #start-message, #game-over-message {
+                font-size: 2em; /* Thông báo to hơn */
+                padding: 25px;
+            }
+
+            #game-over-message button {
+                padding: 15px 30px;
+                font-size: 1.3em;
+            }
+
+            #high-score-display, #top-players-display {
+                padding: 30px;
+                font-size: 1.3em;
+            }
+            #high-score-display h3, #top-players-display h3 {
+                font-size: 2.2em;
+            }
+            .back-to-menu-button {
+                padding: 12px 25px;
+                font-size: 1.1em;
+            }
+        }
+
+        /* --- Desktop Specific Body Background (optional, for outside game container) --- */
+        @media (min-width: 768px) {
+            body {
+                /* Ví dụ: Thêm một gradient subtle cho nền body trên desktop */
+                background: linear-gradient(135deg, var(--bg-primary) 0%, #0a0a1a 100%);
+            }
+            body.light-mode {
+                background: linear-gradient(135deg, var(--bg-primary) 0%, #e0e2e5 100%);
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <div id="intro-screen">
+            <div class="intro-line line-1">Anh Chách</div>
+            <div class="intro-line line-2">mãi đỉnh</div>
+        </div>
+
+        <div id="menu-screen">
+            <div class="menu-title">Flappy J97</div>
+            <button class="menu-button" id="new-game-button">Chơi mới</button>
+            <button class="menu-button" id="high-score-button">Kỷ lục</button>
+            <button class="menu-button" id="top-players-button">Top Server97</button>
+            <button class="menu-button" id="theme-toggle-button">Chế độ Sáng/Tối</button>
+        </div>
+
+        <div id="j97">J97</div> <div id="score-display">0</div>
+        
+        <div id="start-message">Nhấn chuột hoặc Space để bắt đầu!</div>
+        <div id="game-over-message">
+            Game Over! <br> Điểm của bạn: <span id="final-score">0</span>
+            <br>
+            <button id="restart-button">Chơi lại</button>
+            <button class="back-to-menu-button" onclick="showMenu()">Quay lại Menu</button>
+        </div>
+
+        <div id="high-score-display">
+            <h3>Kỷ lục của bạn</h3>
+            <p>Điểm cao nhất: <span id="personal-high-score">0</span></p>
+            <button class="back-to-menu-button" onclick="showMenu()">Quay lại Menu</button>
+        </div>
+
+        <div id="top-players-display">
+            <h3>Top Server97</h3>
+            <ul id="top-players-list">
+                </ul>
+            <button class="back-to-menu-button" onclick="showMenu()">Quay lại Menu</button>
+        </div>
+    </div>
+
+    <script>
+        const gameContainer = document.getElementById('game-container');
+        const introScreen = document.getElementById('intro-screen');
+        const menuScreen = document.getElementById('menu-screen');
+        const j97 = document.getElementById('j97');
+        const scoreDisplay = document.getElementById('score-display');
+        const startMessage = document.getElementById('start-message');
+        const gameOverMessage = document.getElementById('game-over-message');
+        const finalScoreDisplay = document.getElementById('final-score');
+        const restartButton = document.getElementById('restart-button');
+        const newGameButton = document.getElementById('new-game-button');
+        const highScoreButton = document.getElementById('high-score-button');
+        const topPlayersButton = document.getElementById('top-players-button');
+        const themeToggleButton = document.getElementById('theme-toggle-button'); // Nút chuyển đổi theme
+        const highScoreDisplay = document.getElementById('high-score-display');
+        const personalHighScoreDisplay = document.getElementById('personal-high-score');
+        const topPlayersDisplay = document.getElementById('top-players-display');
+
+        // Kích thước gameContainer sẽ được CSS điều chỉnh qua media query
+        // Lấy lại kích thước sau khi CSS đã áp dụng
+        let gameWidth; 
+        let gameHeight;
+
+        let j97Y = 200;
+        let j97Velocity = 0;
+        const gravity = 0.4; // Giảm trọng lực để dễ hơn
+        const jumpStrength = -7; // Giảm lực nhảy để dễ hơn
+
+        let score = 0;
+        // Lấy điểm cao nhất từ Local Storage, nếu không có thì là 0
+        let personalHighScore = localStorage.getItem('flappyJ97HighScore') ? parseInt(localStorage.getItem('flappyJ97HighScore')) : 0;
+        let pipes = [];
+        let gameStarted = false;
+        let gameOver = false;
+        let gameInterval;
+        let pipeGenerationInterval;
+
+        // Biến điều chỉnh tốc độ/khoảng cách ống
+        let pipeGenerationIntervalTime; 
+        let pipeMoveSpeed; 
+
+        let lastPipeScoredTime = 0; // Thời gian cuối cùng pipe được tính điểm
+        const minTimeBetweenScoreEffect = 300; // 0.3 giây để tránh hiệu ứng rơi chữ quá nhiều
+
+        const pipeObstacleTexts = ["Thiên An", "Bé Sol"]; // Các chữ sẽ xuất hiện trên chướng ngại vật
+        const rewardTexts = ["5 TRIỆU!", "BÉ SOL!"]; // Các chữ sẽ rơi xuống khi qua chướng ngại vật
+
+        const defaultTopPlayers = [
+            { name: "J97_No.1", score: 999 },
+            { name: "ChachIsBoss", score: 850 },
+            { name: "GeguPro", score: 780 },
+            { name: "NguoiQuaDuong", score: 600 },
+            { name: "FanAnhChach", score: 550 }
+        ];
+
+        // --- Theme Functions ---
+        function applyTheme(theme) {
+            if (theme === 'light') {
+                document.body.classList.add('light-mode');
+                themeToggleButton.textContent = 'Chế độ Tối';
+            } else {
+                document.body.classList.remove('light-mode');
+                themeToggleButton.textContent = 'Chế độ Sáng';
+            }
+            localStorage.setItem('flappyJ97Theme', theme);
+        }
+
+        function toggleTheme() {
+            const currentTheme = localStorage.getItem('flappyJ97Theme') || 'dark';
+            if (currentTheme === 'dark') {
+                applyTheme('light');
+            } else {
+                applyTheme('dark');
+            }
+        }
+
+        // --- Game Flow Functions ---
+        function initializeGame() {
+            // Cập nhật kích thước game container sau khi CSS đã được áp dụng
+            gameWidth = gameContainer.offsetWidth;
+            gameHeight = gameContainer.offsetHeight;
+
+            // Ẩn tất cả các màn hình phụ và reset trạng thái game
+            menuScreen.classList.remove('visible');
+            startMessage.style.display = 'none';
+            gameOverMessage.style.display = 'none';
+            highScoreDisplay.style.display = 'none';
+            topPlayersDisplay.style.display = 'none';
+
+            // Reset J97 và điểm
+            j97Y = gameHeight / 2; // Đặt J97 vào giữa theo chiều cao
+            j97Velocity = 0;
+            score = 0;
+            scoreDisplay.textContent = score;
+            j97.style.top = j97Y + 'px';
+            j97.style.transform = 'rotate(0deg)'; // Đảm bảo J97 không xoay khi khởi tạo
+
+            // Xóa tất cả chướng ngại vật cũ
+            pipes.forEach(pipe => pipe.element.remove());
+            pipes = [];
+            
+            // Ẩn J97 và score display ban đầu khi đang ở menu/intro
+            j97.style.opacity = 0;
+            scoreDisplay.style.opacity = 0;
+        }
+
+        function showIntro() {
+            introScreen.classList.add('visible');
+            // Intro sẽ tự động ẩn và chuyển sang menu sau một khoảng thời gian
+            setTimeout(() => {
+                introScreen.classList.remove('visible');
+                introScreen.classList.add('hidden'); // Để kích hoạt transition ẩn của intro
+                setTimeout(showMenu, 1000); // Chờ intro ẩn xong thì hiện menu
+            }, 2500); // Hiện intro trong 2.5 giây
+        }
+
+        function showMenu() {
+            initializeGame(); // Đảm bảo trạng thái sạch khi vào menu
+            menuScreen.classList.add('visible');
+            // Đảm bảo J97 và score display ẩn khi ở menu
+            j97.style.opacity = 0;
+            scoreDisplay.style.opacity = 0;
+        }
+
+        function startGame() {
+            // Cập nhật kích thước game container ngay khi game bắt đầu
+            gameWidth = gameContainer.offsetWidth;
+            gameHeight = gameContainer.offsetHeight;
+
+            // Dọn dẹp màn hình cũ nếu có
+            gameOverMessage.style.display = 'none';
+            highScoreDisplay.style.display = 'none';
+            topPlayersDisplay.style.display = 'none';
+            menuScreen.classList.remove('visible'); 
+
+            // Reset game state
+            j97Y = gameHeight / 2; // Đặt J97 vào giữa lại
+            j97Velocity = 0;
+            score = 0;
+            scoreDisplay.textContent = score;
+            j97.style.top = j97Y + 'px';
+            j97.style.transform = 'rotate(0deg)'; // Đảm bảo J97 không bị xoay trước khi chơi
+            j97.style.opacity = 1; // Hiện J97
+            scoreDisplay.style.opacity = 1; // Hiện điểm
+
+            pipes.forEach(pipe => pipe.element.remove());
+            pipes = [];
+            
+            gameOver = false; // Reset trạng thái game over
+            gameStarted = false; // Chờ người chơi nhấn để bắt đầu game loop
+            startMessage.style.display = 'block'; // Hiện thông báo bắt đầu
+        }
+
+        function runGameLoop() {
+            // Ẩn thông báo bắt đầu
+            startMessage.style.display = 'none';
+
+            // Điều chỉnh tốc độ sinh ống và di chuyển dựa trên kích thước game container
+            if (gameContainer.offsetWidth > 320) { // Nếu là desktop
+                pipeGenerationIntervalTime = 2200; // Khoảng thời gian dài hơn giữa các ống
+                pipeMoveSpeed = 2.5; // Tốc độ ống nhanh hơn
+            } else { // Nếu là mobile
+                pipeGenerationIntervalTime = 1700;
+                pipeMoveSpeed = 2;
+            }
+
+            gameInterval = setInterval(gameLoop, 20); // Cập nhật game mỗi 20ms
+            pipeGenerationInterval = setInterval(generatePipe, pipeGenerationIntervalTime); // Tạo chướng ngại vật theo thời gian động
+        }
+
+        function gameLoop() {
+            if (gameOver) return;
+
+            // Cập nhật vị trí J97
+            j97Velocity += gravity;
+            j97Y += j97Velocity;
+            j97.style.top = j97Y + 'px';
+
+            // Xoay J97 theo vận tốc
+            const rotation = Math.min(Math.max(j97Velocity * 2.5, -45), 45); 
+            j97.style.transform = `rotate(${rotation}deg)`; // Chỉ sử dụng transform để xoay
+
+            // Kiểm tra va chạm với sàn/trần
+            if (j97Y + j97.offsetHeight >= gameHeight || j97Y <= 0) {
+                endGame();
+                return;
+            }
+
+            // Cập nhật vị trí và kiểm tra va chạm của chướng ngại vật
+            pipes.forEach(pipe => {
+                pipe.x -= pipeMoveSpeed; // Sử dụng tốc độ di chuyển động
+                pipe.element.style.left = pipe.x + 'px';
+
+                // Nếu que ra khỏi màn hình, xóa nó
+                if (pipe.x + pipe.width < 0) {
+                    pipe.element.remove();
+                    pipes.splice(pipes.indexOf(pipe), 1);
+                }
+
+                // Kiểm tra va chạm với J97
+                if (checkCollision(j97, pipe.element)) {
+                    endGame();
+                    return;
+                }
+
+                // Tính điểm khi vượt qua que (chỉ tính 1 lần cho cả cặp ống)
+                if (!pipe.scored && pipe.position === 'top' && pipe.x + pipe.width < j97.offsetLeft) {
+                    score++;
+                    scoreDisplay.textContent = score;
+                    // Đánh dấu cả 2 ống của cặp đã được tính điểm
+                    pipes.forEach(p => {
+                        if (p.pipeId === pipe.pipeId) {
+                            p.scored = true;
+                        }
+                    });
+                    
+                    // Tạo hiệu ứng rơi chữ ngẫu nhiên (5 TRIỆU / BÉ SOL)
+                    const randomRewardText = rewardTexts[Math.floor(Math.random() * rewardTexts.length)];
+                    createFallingText(j97.offsetLeft + j97.offsetWidth / 2, j97.offsetTop + j97.offsetHeight / 2, randomRewardText);
+                }
+            });
+        }
+
+        function generatePipe() {
+            if (gameOver) return;
+
+            const pipeWidth = 60; // Base width, actual width from CSS media query
+            const pipeGap = 160; // Khoảng cách giữa ống trên và dưới
+            const minPipeHeight = 50;
+            const maxPipeHeight = gameHeight - pipeGap - minPipeHeight;
+
+            const topPipeHeight = Math.floor(Math.random() * (maxPipeHeight - minPipeHeight + 1)) + minPipeHeight;
+            const bottomPipeHeight = gameHeight - topPipeHeight - pipeGap;
+
+            const pipeX = gameWidth; // Xuất hiện từ ngoài cùng bên phải
+            const pipeId = Date.now(); // ID duy nhất cho cặp ống
+
+            // Lấy chữ cho chướng ngại vật hiện tại dựa trên số điểm (Thiên An / Bé Sol)
+            const currentPipeText = pipeObstacleTexts[(Math.floor(score)) % pipeObstacleTexts.length]; 
+
+            // Tạo ống trên
+            const topPipe = document.createElement('div');
+            topPipe.classList.add('pipe', 'top');
+            topPipe.style.height = topPipeHeight + 'px';
+            topPipe.style.left = pipeX + 'px';
+            // Không set width ở đây, để CSS responsive lo
+            // topPipe.style.width = pipeWidth + 'px'; 
+            topPipe.innerHTML = `<div class="pipe-content-wrapper"><div class="pipe-text" style="transform: rotate(-90deg);">${currentPipeText}</div></div>`;
+            gameContainer.appendChild(topPipe);
+
+            // Tạo ống dưới
+            const bottomPipe = document.createElement('div');
+            bottomPipe.classList.add('pipe', 'bottom');
+            bottomPipe.style.height = bottomPipeHeight + 'px';
+            bottomPipe.style.left = pipeX + 'px';
+            // Không set width ở đây, để CSS responsive lo
+            // bottomPipe.style.width = pipeWidth + 'px';
+            bottomPipe.innerHTML = `<div class="pipe-content-wrapper"><div class="pipe-text" style="transform: rotate(90deg);">${currentPipeText}</div></div>`;
+            gameContainer.appendChild(bottomPipe);
+
+            // Lấy chiều rộng thực tế của ống sau khi được render với CSS (responsive width)
+            const actualPipeWidth = topPipe.offsetWidth; 
+
+            pipes.push({
+                element: topPipe,
+                x: pipeX,
+                width: actualPipeWidth, // Sử dụng chiều rộng thực tế của ống
+                height: topPipeHeight,
+                position: 'top',
+                scored: false,
+                pipeId: pipeId
+            });
+            pipes.push({
+                element: bottomPipe,
+                x: pipeX,
+                width: actualPipeWidth, // Sử dụng chiều rộng thực tế của ống
+                height: bottomPipeHeight,
+                position: 'bottom',
+                scored: false,
+                pipeId: pipeId
+            });
+        }
+
+        function checkCollision(j97Element, pipeElement) {
+            const j97Rect = j97Element.getBoundingClientRect();
+            const pipeRect = pipeElement.getBoundingClientRect();
+            const containerRect = gameContainer.getBoundingClientRect();
+
+            // Tính toán vị trí tương đối so với gameContainer
+            const j97Left = j97Rect.left - containerRect.left;
+            const j97Top = j97Rect.top - containerRect.top;
+            const j97Right = j97Left + j97Rect.width; 
+            const j97Bottom = j97Top + j97Rect.height;
+
+            const pipeLeft = pipeRect.left - containerRect.left;
+            const pipeTop = pipeRect.top - containerRect.top;
+            const pipeRight = pipeLeft + pipeRect.width;
+            const pipeBottom = pipeTop + pipeRect.height;
+
+            // Kiểm tra va chạm hộp chữ nhật
+            return j97Right > pipeLeft &&
+                   j97Left < pipeRight &&
+                   j97Bottom > pipeTop &&
+                   j97Top < pipeBottom;
+        }
+
+        function jump() {
+            if (gameOver) return;
+
+            if (!gameStarted) {
+                gameStarted = true;
+                runGameLoop();
+            }
+            j97Velocity = jumpStrength;
+        }
+
+        function endGame() {
+            gameOver = true;
+            gameStarted = false;
+            clearInterval(gameInterval);
+            clearInterval(pipeGenerationInterval);
+
+            finalScoreDisplay.textContent = score;
+            gameOverMessage.style.display = 'block';
+        }
+
+        function createFallingText(x, y, textContent) {
+            const currentTime = Date.now();
+            if (currentTime - lastPipeScoredTime < minTimeBetweenScoreEffect) {
+                return; // Giới hạn tần suất tạo hiệu ứng
+            }
+            lastPipeScoredTime = currentTime;
+
+            const fallingText = document.createElement('div');
+            fallingText.classList.add('falling-reward-text');
+            fallingText.textContent = textContent;
+            
+            // Đặt vị trí ban đầu của chữ
+            fallingText.style.left = x + 'px';
+            fallingText.style.top = y + 'px';
+            
+            gameContainer.appendChild(fallingText);
+
+            // Xóa chữ sau khi animation kết thúc
+            fallingText.addEventListener('animationend', () => {
+                fallingText.remove();
+            });
+        }
+
+        // --- Event Listeners ---
+        // Sử dụng event delegation để bắt click trên gameContainer
+        gameContainer.addEventListener('mousedown', (e) => {
+            // Đảm bảo chỉ xử lý click khi game đang chạy hoặc chuẩn bị chạy
+            if (gameStarted || (!gameStarted && !gameOver && startMessage.style.display === 'block')) {
+                jump();
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault(); // Ngăn cuộn trang khi nhấn Space
+                // Đảm bảo chỉ xử lý phím Space khi game đang chạy hoặc chuẩn bị chạy
+                if (gameStarted || (!gameStarted && !gameOver && startMessage.style.display === 'block')) {
+                    jump();
+                }
+            }
+        });
+
+        restartButton.addEventListener('click', startGame);
+        newGameButton.addEventListener('click', startGame);
+        themeToggleButton.addEventListener('click', toggleTheme); // Event listener cho nút theme
+
+        highScoreButton.addEventListener('click', () => {
+            menuScreen.classList.remove('visible');
+            highScoreDisplay.style.display = 'flex';
+            personalHighScoreDisplay.textContent = personalHighScore; // Cập nhật lại điểm cao nhất
+        });
+
+        topPlayersButton.addEventListener('click', () => {
+            menuScreen.classList.remove('visible');
+            topPlayersDisplay.style.display = 'flex';
+            // Cập nhật danh sách top players từ mặc định hoặc từ API nếu có
+            const topPlayersList = document.getElementById('top-players-list');
+            topPlayersList.innerHTML = ''; // Xóa danh sách cũ
+            defaultTopPlayers.forEach((player, index) => {
+                const li = document.createElement('li');
+                li.innerHTML = `<span>${index + 1}. ${player.name}</span><span>${player.score}</span>`;
+                topPlayersList.appendChild(li);
+            });
+        });
+
+        // Khởi tạo game và áp dụng theme khi tải trang
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('flappyJ97Theme') || 'dark'; // Mặc định là dark
+            applyTheme(savedTheme);
+            showIntro();
+        });
+    </script>
+</body>
+</html>

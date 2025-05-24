@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>J97-Rex</title>
+    <link href="https://fonts.googleapis.com/css2?family=Oxanium:wght@400;700&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        /* --- CSS Variables cho Dark và Light Mode --- */
+        /* Default (Dark) Theme Variables */
+        :root {
+            --bg-primary: #1a1a2e; /* body background */
+            --text-color-primary: #e0e0e0; /* general text color */
+            --game-container-bg: #3e3e4a; /* game-container background */
+            --menu-overlay-bg: rgba(15, 15, 28, 0.9); /* menu-screen background */
+            --intro-bg: #0f0f1c; /* intro-screen background */
+            --accent-color: #e94560; /* main accent color for buttons, titles */
+            --accent-color-hover: #c9354e;
+            --j97-color: #ffd700; /* Màu vàng của J97 */
+            --ground-color: #3e3e4a; /* Màu nền đường chạy */
+            --ground-border-color: #e0e0e0; /* Màu viền đường chạy */
+            --obstacle-text-color: #FF69B4; /* Màu hồng cho chữ chướng ngại vật */
+            --score-text-color: #fff;
+            --message-bg: rgba(0, 0, 0, 0.7);
+            --button-bg: #e94560;
+            --button-hover-bg: #c9354e;
+            --theme-button-bg: #4a4a4a;
+            --theme-button-hover-bg: #6a6a6a;
+            --falling-reward-color: #ffd700; /* Màu chữ 5 triệu */
+            --score-bonus-color: #00ff00; /* Màu chữ +10 */
+            --snow-color: rgba(255, 255, 255, 0.8); /* Màu tuyết sáng */
+        }
+
+        /* Light Theme Variables */
+        body.light-mode {
+            --bg-primary: #f0f2f5;
+            --text-color-primary: #333;
+            --game-container-bg: #e6e8eb;
+            --menu-overlay-bg: rgba(255, 255, 255, 0.9);
+            --intro-bg: #f8f8f8;
+            --accent-color: #4CAF50; /* Green accent */
+            --accent-color-hover: #45a049;
+            --j97-color: #FFA000; /* Darker yellow */
+            --ground-color: #f0f0f0;
+            --ground-border-color: #666;
+            --obstacle-text-color: #8BC34A; /* Green for obstacles */
+            --score-text-color: #333;
+            --message-bg: rgba(255, 255, 255, 0.9);
+            --button-bg: #4CAF50;
+            --button-hover-bg: #45a049;
+            --theme-button-bg: #d0d0d0;
+            --theme-button-hover-bg: #c0c0c0;
+            --falling-reward-color: #FFA000;
+            --score-bonus-color: #008000; /* Darker green for light mode */
+            --snow-color: rgba(0, 0, 0, 0.3); /* Màu tuyết tối */
+        }
+
+        /* --- Global Styles --- */
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: var(--bg-primary);
+            font-family: 'Oxanium', sans-serif;
+            overflow: hidden;
+            color: var(--text-color-primary);
+            transition: background-color 0.5s ease, color 0.5s ease;
+        }
+
+        #game-container {
+            width: 800px;
+            height: 300px; /* Đã chỉnh chiều cao lên 300px */
+            background-color: var(--game-container-bg);
+            border-bottom: 2px solid var(--ground-border-color); /* Đường nền */
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.7);
+            border-radius: 10px;
+            transition: background-color 0.5s ease, border-color 0.5s ease;
+        }
+
+        /* --- Intro Screen --- */
+        #intro-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--intro-bg);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 1s ease-out, visibility 1s ease-out, background-color 0.5s ease;
+            z-index: 100;
+        }
+        #intro-screen.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+        #intro-screen.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+        .intro-line {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 3.5em; /* Kích thước to hơn cho đẹp */
+            font-weight: 700;
+            color: var(--accent-color);
+            text-shadow: 0 0 15px var(--accent-color);
+            opacity: 0;
+            transform: translateY(20px) scale(0.8);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out, color 0.5s ease, text-shadow 0.5s ease;
+        }
+        #intro-screen.visible .intro-line.line-1 {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            transition-delay: 0.2s;
+        }
+        #intro-screen.visible .intro-line.line-2 {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            transition-delay: 0.6s;
+        }
+
+        /* --- Main Menu Screen --- */
+        #menu-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--menu-overlay-bg);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.5s ease-out, visibility 0.5s ease-out, background-color 0.5s ease;
+            z-index: 90;
+        }
+        #menu-screen.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .menu-title {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 2.8em;
+            font-weight: 700;
+            color: var(--accent-color);
+            text-shadow: 0 0 8px var(--accent-color);
+            margin-bottom: 40px;
+            transition: color 0.5s ease, text-shadow 0.5s ease;
+        }
+
+        .menu-button {
+            background-color: var(--button-bg);
+            color: white;
+            padding: 15px 30px;
+            margin: 15px 0; /* Đã chỉnh khoảng cách giữa các nút */
+            border: none;
+            border-radius: 8px;
+            font-family: 'Oxanium', sans-serif;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            width: 200px;
+            text-transform: uppercase;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            transition: background-color 0.3s ease, transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        .menu-button:hover {
+            background-color: var(--button-hover-bg);
+            transform: translateY(-3px);
+        }
+
+        #theme-toggle-button-menu { /* Nút theme trong menu */
+            background-color: var(--theme-button-bg);
+            color: var(--text-color-primary);
+            margin-top: 20px;
+            font-size: 1em;
+            width: 200px;
+            transition: background-color 0.3s ease, color 0.5s ease;
+        }
+        #theme-toggle-button-menu:hover {
+            background-color: var(--theme-button-hover-bg);
+        }
+        /* High Score & Top Players */
+        #high-score-display, #top-players-display {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--menu-overlay-bg);
+            display: none; /* Mặc định ẩn */
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            color: var(--text-color-primary);
+            font-size: 1.1em;
+            z-index: 95; /* Nằm trên game nhưng dưới intro/menu chính */
+            transition: background-color 0.5s ease, color 0.5s ease;
+        }
+        #high-score-display.visible, #top-players-display.visible {
+            display: flex;
+        }
+        #high-score-display h3, #top-players-display h3 {
+            font-family: 'Rajdhani', sans-serif;
+            color: var(--falling-reward-color); /* Vàng kim */
+            margin-bottom: 15px;
+            font-size: 1.8em;
+            text-shadow: 1px 1px 0 #000;
+            transition: color 0.5s ease;
+        }
+        #top-players-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            width: 80%;
+            max-width: 300px;
+        }
+        #top-players-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        #top-players-list li:last-child {
+            border-bottom: none;
+        }
+        #top-players-list li span:first-child {
+            font-weight: bold;
+            color: var(--accent-color);
+        }
+        #top-players-list li span:last-child {
+            color: var(--text-color-primary);
+        }
+
+        .back-to-menu-button {
+            background-color: var(--theme-button-bg); /* Màu xám */
+            margin-top: 20px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            color: var(--text-color-primary);
+            font-size: 1em;
+            cursor: pointer;
+            transition: background-color 0.3s ease, color 0.5s ease;
+        }
+        .back-to-menu-button:hover {
+            background-color: var(--theme-button-hover-bg);
+        }
+
+
+        /* --- Game Elements --- */
+        #j97 {
+            position: absolute;
+            width: 40px;
+            height: 50px;
+            background-color: var(--j97-color);
+            bottom: 0; /* J97 bắt đầu ở đáy container */
+            left: 50px;
+            z-index: 10;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            color: #333; /* Chữ trên J97 màu đen */
+            font-size: 0.9em;
+            border-radius: 5px;
+            transition: background-color 0.5s ease, transform 0.3s ease-out; /* Thêm transition cho transform */
+        }
+
+        /* Khi J97 đang nhảy lên hoặc rơi xuống */
+        #j97.jumping {
+            transform: rotate(360deg); /* Xoay 1 vòng khi nhảy */
+        }
+
+        #j97.falling {
+            transform: rotate(-360deg); /* Xoay ngược 1 vòng khi rơi */
+        }
+
+        /* Hiệu ứng giật khi J97 tiếp đất */
+        @keyframes j97-thump {
+            0% { transform: scaleY(1) translateY(0) rotate(0deg); } /* Về trạng thái bình thường */
+            50% { transform: scaleY(0.9) translateY(5px) rotate(0deg); } /* Hơi bẹp xuống và lún nhẹ */
+            100% { transform: scaleY(1) translateY(0) rotate(0deg); } /* Trở lại bình thường */
+        }
+        #j97.thumping {
+            animation: j97-thump 0.15s ease-out forwards; /* Chạy animation nhanh và giữ trạng thái cuối */
+        }
+
+
+        .obstacle {
+            position: absolute;
+            /* bottom sẽ được set bằng JS */
+            background-color: transparent; /* Chỉ có chữ, không có nền */
+            font-size: 1.2em; /* Kích thước chữ chướng ngại vật nhỏ lại */
+            font-weight: bold;
+            color: var(--obstacle-text-color);
+            white-space: nowrap;
+            z-index: 5;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+            animation: bounce 0.5s infinite alternate; /* Hiệu ứng nảy nhẹ */
+            transition: color 0.5s ease;
+        }
+
+        @keyframes bounce {
+            from { transform: translateY(0); }
+            to { transform: translateY(-5px); }
+        }
+
+        /* Hiệu ứng "5 TRIỆU!" và "+10!" */
+        .falling-reward-text, .score-bonus-text {
+            position: absolute;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 2.5em;
+            font-weight: 700;
+            text-shadow: 2px 2px 5px rgba(0,0,0,0.8);
+            animation: popAndFade 1.5s forwards ease-out;
+            z-index: 20;
+            pointer-events: none;
+            white-space: nowrap;
+            transition: color 0.5s ease, text-shadow 0.5s ease;
+        }
+        .falling-reward-text {
+            color: var(--falling-reward-color); /* Vàng sáng */
+            text-shadow: 2px 2px 5px rgba(0,0,0,0.8), 0 0 15px var(--accent-color); /* Hiệu ứng phát sáng theo accent */
+        }
+        .score-bonus-text {
+            font-size: 1.8em; /* Nhỏ hơn 5 TRIỆU */
+            color: var(--score-bonus-color); /* Màu xanh lá */
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+        }
+
+        @keyframes popAndFade {
+            0% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-50px) scale(1.5); /* Bay lên trên và phóng to, rồi fade */
+            }
+        }
+
+
+        #score-display {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 1.8em;
+            font-weight: bold;
+            color: var(--score-text-color);
+            text-shadow: 2px 2px 0 #000;
+            z-index: 15;
+            transition: color 0.5s ease;
+        }
+
+        #start-message, #game-over-message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: var(--message-bg);
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 1.8em;
+            font-weight: bold;
+            z-index: 20;
+            transition: background-color 0.5s ease, color 0.5s ease;
+        }
+
+        #game-over-message {
+            display: none;
+        }
+
+        .game-button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 1em;
+            background-color: var(--button-bg);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .game-button:hover {
+            background-color: var(--button-hover-bg);
+        }
+
+        /* Canvas cho hiệu ứng tuyết rơi */
+        #snow-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1; /* Đảm bảo tuyết rơi phía sau các yếu tố game chính */
+            pointer-events: none; /* Không chặn tương tác chuột/phím */
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <canvas id="snow-canvas"></canvas>
+
+        <div id="intro-screen">
+            <div class="intro-line line-1">Anh Chách</div>
+            <div class="intro-line line-2">mãi đỉnh</div>
+        </div>
+
+        <div id="menu-screen">
+            <div class="menu-title">J97-Rex</div>
+            <button class="menu-button" id="new-game-button">Chơi mới</button>
+            <button class="menu-button" id="high-score-button">Kỷ lục</button>
+            <button class="menu-button" id="top-players-button">Top Server97</button>
+            <button class="menu-button" id="theme-toggle-button-menu">Chế độ Sáng/Tối</button>
+        </div>
+
+        <div id="high-score-display">
+            <h3>Kỷ lục của bạn</h3>
+            <p>Điểm cao nhất: <span id="personal-high-score">0</span></p>
+            <button class="back-to-menu-button" onclick="showMenu()">Quay lại Menu</button>
+        </div>
+
+        <div id="top-players-display">
+            <h3>Top Server97</h3>
+            <ul id="top-players-list">
+                </ul>
+            <button class="back-to-menu-button" onclick="showMenu()">Quay lại Menu</button>
+        </div>
+
+        <div id="j97">J97</div>
+        <div id="score-display">0</div>
+        <div id="start-message">Nhấn Space hoặc Click để nhảy và bắt đầu!</div>
+        <div id="game-over-message">
+            Game Over! <br> Điểm của bạn: <span id="final-score">0</span>
+            <button id="restart-button" class="game-button">Chơi lại</button>
+            <button class="game-button back-to-menu-button" onclick="showMenu()">Quay lại Menu</button>
+        </div>
+    </div>
+
+    <script>
+        const gameContainer = document.getElementById('game-container');
+        const introScreen = document.getElementById('intro-screen');
+        const menuScreen = document.getElementById('menu-screen');
+        const j97 = document.getElementById('j97');
+        const scoreDisplay = document.getElementById('score-display');
+        const startMessage = document.getElementById('start-message');
+        const gameOverMessage = document.getElementById('game-over-message');
+        const finalScoreDisplay = document.getElementById('final-score');
+        const restartButton = document.getElementById('restart-button');
+        const themeToggleButtonMenu = document.getElementById('theme-toggle-button-menu');
+        const newGameButton = document.getElementById('new-game-button');
+        const highScoreButton = document.getElementById('high-score-button');
+        const topPlayersButton = document.getElementById('top-players-button');
+        const highScoreDisplay = document.getElementById('high-score-display');
+        const personalHighScoreDisplay = document.getElementById('personal-high-score');
+        const topPlayersDisplay = document.getElementById('top-players-display');
+        const topPlayersList = document.getElementById('top-players-list');
+
+        const gameWidth = gameContainer.offsetWidth;
+        const groundLevel = 0;
+        const j97Width = j97.offsetWidth;
+        const j97Height = j97.offsetHeight;
+
+        let j97Y = groundLevel;
+        let j97Velocity = 0;
+        const gravity = 0.8;
+        const jumpStrength = 15;
+
+        let score = 0;
+        let personalHighScore = localStorage.getItem('j97RexHighScore') ? parseInt(localStorage.getItem('j97RexHighScore')) : 0;
+        let obstacles = [];
+        let gameStarted = false;
+        let gameOver = false;
+        let gameInterval;
+        let obstacleTimeoutId; // Dùng để quản lý setTimeout của chướng ngại vật
+
+        // Cài đặt tốc độ game và sinh chướng ngại vật động
+        const initialObstacleSpeed = 4; // Tốc độ khởi đầu chậm
+        const speedIncreaseInterval = 10; // Tăng tốc độ mỗi 10 điểm
+        const speedIncrementPerInterval = 0.3; // Tăng 0.3 tốc độ mỗi lần
+        const maxObstacleSpeed = 12; // Tốc độ tối đa
+        let currentObstacleSpeed = initialObstacleSpeed; // Tốc độ hiện tại của chướng ngại vật
+
+        const initialObstacleGenDelay = 2500; // Khoảng thời gian ban đầu để tạo chướng ngại vật
+        const minObstacleGenDelay = 1000; // Khoảng thời gian tối thiểu để tạo chướng ngại vật
+        const delayDecreasePerScore = 15; // Giảm khoảng thời gian sinh chướng ngại vật mỗi 15 điểm
+        const delayDecreaseAmount = 50; // Giảm 50ms mỗi lần
+
+        const obstacleTexts = ["beSOL", "nuôi con"];
+        let startTime;
+        let lastThemeChangeScoreMark = 0;
+        const themeChangeThreshold = 60; // Đổi theme mỗi 60 điểm (30 giây)
+
+        // --- Snowfall Variables ---
+        const snowCanvas = document.getElementById('snow-canvas');
+        const snowCtx = snowCanvas.getContext('2d');
+        let snowflakes = [];
+        const numSnowflakes = 100;
+        let currentSnowColor = 'rgba(255, 255, 255, 0.8)';
+
+        class Snowflake {
+            constructor() {
+                this.x = Math.random() * snowCanvas.width;
+                this.y = Math.random() * snowCanvas.height;
+                this.radius = Math.random() * 2 + 1;
+                this.speedY = Math.random() * 1 + 0.5;
+                this.speedX = Math.random() * 1 - 0.5;
+                this.opacity = Math.random() * 0.5 + 0.5;
+            }
+
+            draw() {
+                snowCtx.beginPath();
+                snowCtx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                snowCtx.fillStyle = currentSnowColor;
+                snowCtx.globalAlpha = this.opacity;
+                snowCtx.fill();
+            }
+
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+
+                if (this.y > snowCanvas.height + this.radius || this.x < -this.radius || this.x > snowCanvas.width + this.radius) {
+                    this.x = Math.random() * snowCanvas.width;
+                    this.y = -this.radius;
+                    this.speedY = Math.random() * 1 + 0.5;
+                    this.speedX = Math.random() * 1 - 0.5;
+                    this.opacity = Math.random() * 0.5 + 0.5;
+                }
+            }
+        }
+
+        function initSnowflakes() {
+            snowflakes = [];
+            for (let i = 0; i < numSnowflakes; i++) {
+                snowflakes.push(new Snowflake());
+            }
+        }
+
+        function drawSnow() {
+            snowCtx.clearRect(0, 0, snowCanvas.width, snowCanvas.height);
+            snowflakes.forEach(flake => {
+                flake.draw();
+                flake.update();
+            });
+            requestAnimationFrame(drawSnow);
+        }
+
+        // --- Default Top Players ---
+        const defaultTopPlayers = [
+            { name: "J97_No.1", score: 99999 },
+            { name: "BeSol_Pro", score: 85000 },
+            { name: "NuoiCon_Vip", score: 78000 },
+            { name: "ChachIsBoss", score: 60000 },
+            { name: "GeguZenith", score: 55000 }
+        ];
+
+        // --- Theme Functions ---
+        function applyTheme(theme) {
+            if (theme === 'light') {
+                document.body.classList.add('light-mode');
+                themeToggleButtonMenu.textContent = 'Chế độ Tối';
+                currentSnowColor = 'rgba(0, 0, 0, 0.3)';
+            } else {
+                document.body.classList.remove('light-mode');
+                themeToggleButtonMenu.textContent = 'Chế độ Sáng';
+                currentSnowColor = 'rgba(255, 255, 255, 0.8)';
+            }
+            localStorage.setItem('j97RexTheme', theme);
+        }
+
+        function toggleTheme() {
+            const currentTheme = localStorage.getItem('j97RexTheme') || 'dark';
+            if (currentTheme === 'dark') {
+                applyTheme('light');
+            } else {
+                applyTheme('dark');
+            }
+        }
+
+        // --- Game Flow Functions ---
+        function initializeGame() {
+            introScreen.classList.remove('visible');
+            introScreen.classList.add('hidden');
+            menuScreen.classList.remove('visible');
+            highScoreDisplay.classList.remove('visible');
+            topPlayersDisplay.classList.remove('visible');
+            startMessage.style.display = 'none';
+            gameOverMessage.style.display = 'none';
+
+            j97Y = groundLevel;
+            j97Velocity = 0;
+            j97.style.bottom = j97Y + 'px';
+            j97.classList.remove('jumping', 'falling', 'thumping'); // Xóa tất cả class liên quan đến hiệu ứng
+            j97.style.transform = 'none';
+
+            score = 0;
+            scoreDisplay.textContent = score;
+            lastThemeChangeScoreMark = 0;
+            currentObstacleSpeed = initialObstacleSpeed; // Reset tốc độ về ban đầu
+
+            obstacles.forEach(obs => obs.element.remove());
+            obstacles = [];
+            
+            j97.style.opacity = 1;
+            scoreDisplay.style.opacity = 1;
+            gameOver = false;
+            gameStarted = false;
+            startMessage.style.display = 'block';
+        }
+
+        function showIntro() {
+            introScreen.classList.add('visible');
+            setTimeout(() => {
+                introScreen.classList.remove('visible');
+                introScreen.classList.add('hidden');
+                setTimeout(showMenu, 1000);
+            }, 2500);
+        }
+
+        function showMenu() {
+            initializeGame();
+            menuScreen.classList.add('visible');
+            j97.style.opacity = 0;
+            scoreDisplay.style.opacity = 0;
+        }
+
+        function startGame() {
+            gameOverMessage.style.display = 'none';
+            highScoreDisplay.classList.remove('visible');
+            topPlayersDisplay.classList.remove('visible');
+            menuScreen.classList.remove('visible'); 
+
+            score = 0;
+            scoreDisplay.textContent = score;
+            lastThemeChangeScoreMark = 0;
+            currentObstacleSpeed = initialObstacleSpeed;
+            j97Y = groundLevel;
+            j97Velocity = 0;
+            j97.style.bottom = j97Y + 'px';
+            j97.classList.remove('jumping', 'falling', 'thumping');
+            j97.style.transform = 'none';
+
+            obstacles.forEach(obs => obs.element.remove());
+            obstacles = [];
+            gameOver = false;
+            gameStarted = true;
+            startTime = performance.now();
+
+            j97.style.opacity = 1;
+            scoreDisplay.style.opacity = 1;
+            startMessage.style.display = 'none';
+
+            gameInterval = setInterval(gameLoop, 20); // 50 FPS
+            scheduleNextObstacle(); // Bắt đầu sinh chướng ngại vật bằng setTimeout
+        }
+
+        // Hàm lên lịch sinh chướng ngại vật tiếp theo
+        function scheduleNextObstacle() {
+            if (gameOver || !gameStarted) return; // Chỉ lên lịch nếu game đang chạy
+
+            const dynamicDelay = Math.max(
+                minObstacleGenDelay,
+                initialObstacleGenDelay - (Math.floor(score / delayDecreasePerScore) * delayDecreaseAmount)
+            );
+            // Thêm một chút ngẫu nhiên để game bớt đều
+            const actualDelay = dynamicDelay + Math.random() * (dynamicDelay / 2); 
+            
+            obstacleTimeoutId = setTimeout(generateObstacleAndScheduleNext, actualDelay);
+        }
+
+        // Hàm sinh chướng ngại vật và sau đó lên lịch cái tiếp theo
+        function generateObstacleAndScheduleNext() {
+            if (gameOver || !gameStarted) return;
+
+            const obstacleText = obstacleTexts[Math.floor(Math.random() * obstacleTexts.length)];
+            const obstacleElement = document.createElement('div');
+            obstacleElement.classList.add('obstacle');
+            obstacleElement.textContent = obstacleText;
+            gameContainer.appendChild(obstacleElement);
+
+            const obstacleWidth = obstacleElement.offsetWidth;
+            const obstacleHeight = obstacleElement.offsetHeight;
+
+            const isTall = Math.random() < 0.4; // 40% tall, 60% short để tăng độ khó
+            let obstacleBottomOffset = 0;
+
+            if (isTall) {
+                obstacleBottomOffset = 50 + Math.random() * 20;
+            } else {
+                obstacleBottomOffset = 0;
+            }
+            
+            obstacleElement.style.bottom = obstacleBottomOffset + 'px';
+
+            obstacles.push({
+                element: obstacleElement,
+                x: gameWidth,
+                width: obstacleWidth,
+                height: obstacleHeight,
+                bottomOffset: obstacleBottomOffset,
+                isTall: isTall,
+                rewarded: false // Chưa thưởng cho chướng ngại vật này
+            });
+            obstacleElement.style.left = obstacles[obstacles.length - 1].x + 'px';
+
+            scheduleNextObstacle(); // Lên lịch cho chướng ngại vật tiếp theo
+        }
+
+
+        function gameLoop() {
+            if (gameOver) return;
+
+            j97Velocity -= gravity;
+            j97Y += j97Velocity;
+
+            if (j97Velocity > 0) {
+                j97.classList.add('jumping');
+                j97.classList.remove('falling');
+            } else if (j97Velocity < 0 && j97Y > groundLevel + 5) {
+                j97.classList.add('falling');
+                j97.classList.remove('jumping');
+            } else {
+                j97.classList.remove('jumping', 'falling');
+                j97.style.transform = 'none'; // Đảm bảo xoay về 0 khi không nhảy/rơi
+            }
+
+            if (j97Y <= groundLevel) {
+                j97Y = groundLevel;
+                j97Velocity = 0;
+                // Thêm hiệu ứng giật khi tiếp đất
+                if (!j97.classList.contains('thumping')) {
+                    j97.classList.remove('jumping', 'falling'); // Xóa class xoay
+                    j97.style.transform = 'none'; // Đảm bảo không xoay
+                    j97.classList.add('thumping');
+                    j97.addEventListener('animationend', () => { 
+                        j97.classList.remove('thumping'); 
+                    }, { once: true }); // Chỉ lắng nghe một lần
+                }
+            }
+            j97.style.bottom = j97Y + 'px';
+
+            // Tính điểm và cập nhật tốc độ game
+            if (gameStarted) {
+                const currentTime = performance.now();
+                const newScore = Math.floor((currentTime - startTime) / 500); // 2 điểm mỗi 1 giây (500ms)
+                
+                if (newScore !== score) {
+                    score = newScore;
+                    scoreDisplay.textContent = score;
+
+                    // Cập nhật tốc độ chướng ngại vật
+                    currentObstacleSpeed = Math.min(
+                        initialObstacleSpeed + (Math.floor(score / speedIncreaseInterval) * speedIncrementPerInterval),
+                        maxObstacleSpeed
+                    );
+
+                    // Logic đổi theme
+                    if (score > 0 && score % themeChangeThreshold === 0 && score !== lastThemeChangeScoreMark) {
+                        toggleTheme();
+                        lastThemeChangeScoreMark = score;
+                    }
+                }
+            }
+
+            // Di chuyển và kiểm tra va chạm chướng ngại vật
+            for (let i = 0; i < obstacles.length; i++) {
+                const obs = obstacles[i];
+                obs.x -= currentObstacleSpeed;
+                obs.element.style.left = obs.x + 'px';
+
+                if (obs.x + obs.width < 0) {
+                    obs.element.remove();
+                    obstacles.splice(i, 1);
+                    i--;
+                }
+
+                // Hiệu ứng "5 TRIỆU!" và "+10!" khi vượt qua chướng ngại vật
+                if (!obs.rewarded && obs.x + obs.width < j97.offsetLeft) {
+                    createFallingText(j97.offsetLeft + j97Width / 2, j97Y + j97Height / 2, "5 TRIỆU!", 'falling-reward-text');
+                    createFallingText(j97.offsetLeft + j97Width / 2, j97Y + j97Height / 2 - 30, "+10!", 'score-bonus-text'); // Thêm +10!
+                    score += 10; // Cộng điểm khi vượt qua chướng ngại vật
+                    scoreDisplay.textContent = score; // Cập nhật điểm
+                    obs.rewarded = true;
+                }
+
+                // Kiểm tra va chạm với J97
+                if (checkCollision(j97, obs.element)) {
+                    endGame();
+                    return;
+                }
+            }
+        }
+
+        function jump() {
+            if (gameOver) return;
+
+            if (!gameStarted) {
+                startGame();
+            }
+
+            if (j97Y <= groundLevel + 5) {
+                j97Velocity = jumpStrength;
+            }
+        }
+
+        // Hàm checkCollision chuẩn AABB (Axis-Aligned Bounding Box)
+        function checkCollision(j97Element, obstacleElement) {
+            const j97Rect = j97Element.getBoundingClientRect();
+            const obstacleRect = obstacleElement.getBoundingClientRect();
+
+            return j97Rect.left < obstacleRect.right &&
+                   j97Rect.right > obstacleRect.left &&
+                   j97Rect.top < obstacleRect.bottom &&
+                   j97Rect.bottom > obstacleRect.top;
+        }
+
+        function endGame() {
+            gameOver = true;
+            gameStarted = false;
+            clearInterval(gameInterval);
+            clearTimeout(obstacleTimeoutId); // Xóa timeout chướng ngại vật đang chờ
+
+            j97.classList.remove('jumping', 'falling', 'thumping');
+            j97.style.transform = 'none';
+
+            if (score > personalHighScore) {
+                personalHighScore = score;
+                localStorage.setItem('j97RexHighScore', personalHighScore);
+            }
+
+            finalScoreDisplay.textContent = score;
+            gameOverMessage.style.display = 'block';
+        }
+
+        // Function for falling text (5 TRIỆU! and +10!)
+        function createFallingText(x, y, textContent, className) {
+            const fallingText = document.createElement('div');
+            fallingText.classList.add(className); // Sử dụng className được truyền vào
+            fallingText.textContent = textContent;
+            
+            fallingText.style.left = x + 'px';
+            fallingText.style.bottom = (gameContainer.offsetHeight - y - j97Height / 2) + 'px';
+            
+            gameContainer.appendChild(fallingText);
+
+            fallingText.addEventListener('animationend', () => {
+                fallingText.remove();
+            });
+        }
+
+        // --- Event Listeners ---
+        gameContainer.addEventListener('mousedown', jump);
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                jump();
+            }
+        });
+
+        restartButton.addEventListener('click', startGame);
+
+        newGameButton.addEventListener('click', startGame);
+        highScoreButton.addEventListener('click', () => {
+            menuScreen.classList.remove('visible');
+            highScoreDisplay.classList.add('visible');
+            personalHighScoreDisplay.textContent = personalHighScore;
+        });
+        topPlayersButton.addEventListener('click', () => {
+            menuScreen.classList.remove('visible');
+            topPlayersDisplay.classList.add('visible');
+            topPlayersList.innerHTML = '';
+            defaultTopPlayers.forEach((player, index) => {
+                const li = document.createElement('li');
+                li.innerHTML = `<span>${index + 1}. ${player.name}</span><span>${player.score}</span>`;
+                topPlayersList.appendChild(li);
+            });
+        });
+        themeToggleButtonMenu.addEventListener('click', toggleTheme);
+
+        // --- Initial Setup ---
+        document.addEventListener('DOMContentLoaded', () => {
+            snowCanvas.width = gameContainer.offsetWidth;
+            snowCanvas.height = gameContainer.offsetHeight;
+            initSnowflakes();
+            drawSnow();
+
+            const savedTheme = localStorage.getItem('j97RexTheme') || 'dark';
+            applyTheme(savedTheme);
+            showIntro();
+        });
+    </script>
+</body>
+</html>
