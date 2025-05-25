@@ -586,14 +586,23 @@
             .loading-bar-container {
                 width: 200px;
             }
+            header {
+                margin-bottom: 40px; /* Giảm margin trên tablet/mobile */
+                padding: 15px; /* Giảm padding */
+            }
             header h1 {
-                font-size: 3em;
+                font-size: 2.8em; /* Giảm font cho tablet */
             }
             header p {
-                font-size: 1.2em;
+                font-size: 1.1em; /* Giảm font cho tablet */
+                margin-top: 15px;
+            }
+            .section {
+                padding: 30px 20px; /* Giảm padding cho tablet/mobile */
+                margin-bottom: 50px; /* Giảm margin cho tablet/mobile */
             }
             .section-title {
-                font-size: 2.5em;
+                font-size: 2.2em; /* Giảm font cho tablet */
                 margin-bottom: 30px;
             }
             .game-button {
@@ -603,10 +612,6 @@
             }
             .game-button i {
                 font-size: 2em;
-            }
-            .section {
-                padding: 40px 20px;
-                margin-bottom: 60px;
             }
             #settings-buttons {
                 top: 15px;
@@ -622,8 +627,9 @@
                 font-size: 1.4em;
             }
             footer {
-                padding: 30px 15px;
-                margin-top: 60px;
+                padding: 25px 15px;
+                margin-top: 50px; /* Giảm margin trên tablet/mobile */
+                font-size: 1em;
             }
         }
 
@@ -637,20 +643,49 @@
                 line-height: 1.4;
             }
             header h1 {
-                font-size: 2.2em;
+                font-size: 2em; /* Giảm font đáng kể cho điện thoại */
+                letter-spacing: 2px;
             }
             header p {
-                font-size: 1em;
+                font-size: 0.9em; /* Giảm font cho điện thoại */
+                margin-top: 10px;
             }
             .section-title {
-                font-size: 1.8em;
+                font-size: 1.6em; /* Giảm font cho điện thoại */
+                margin-bottom: 25px;
+            }
+            .game-selection {
+                grid-template-columns: 1fr; /* Chỉ 1 cột trên màn hình siêu nhỏ */
+                gap: 20px; /* Giảm khoảng cách giữa các nút */
             }
             .game-button {
                 font-size: 1.1em;
                 padding: 15px 20px;
+                gap: 8px;
             }
             .game-button i {
                 font-size: 1.8em;
+            }
+            .section {
+                padding: 25px 15px; /* Giảm padding tối đa */
+                margin-bottom: 40px;
+            }
+            #settings-buttons {
+                top: 10px;
+                left: 10px;
+                gap: 8px;
+            }
+            .setting-btn {
+                width: 40px;
+                height: 40px;
+            }
+            .setting-btn i {
+                font-size: 1.2em;
+            }
+            footer {
+                padding: 20px 10px;
+                margin-top: 40px;
+                font-size: 0.9em;
             }
         }
     </style>
@@ -814,7 +849,7 @@
                         this.y = Math.random() * particleCanvas.height;
                     } else if (side === 2) { // Dưới
                         this.x = Math.random() * particleCanvas.width;
-                        this.y = particleCanvas.height + this.radius;
+                        this.y = particleCanvas.height + particleCanvas.height / 2; // Đảm bảo hạt xuất hiện xa hơn
                     } else { // Trái
                         this.x = -this.radius;
                         this.y = Math.random() * particleCanvas.height;
